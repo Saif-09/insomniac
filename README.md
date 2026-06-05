@@ -5,6 +5,13 @@ prevents clamshell sleep (no external display required) and actively advises how
 long that's safe based on the machine's live thermal state, auto-stopping before
 things get too hot.
 
+### 🌙 [**Download &amp; install → saif-09.github.io/insomniac**](https://saif-09.github.io/insomniac/)
+
+The landing page has the download and a one-minute setup guide. Direct link to
+the latest build:
+[**insomniac.dmg**](https://github.com/Saif-09/insomniac/releases/latest/download/insomniac.dmg)
+(unsigned test build — see the setup steps on the page).
+
 > macOS clamshell sleep is **not** prevented by `caffeinate` or IOKit power
 > assertions unless you have an external display, power, and keyboard attached.
 > insomniac uses `pmset -a disablesleep 1`, which works with nothing attached —

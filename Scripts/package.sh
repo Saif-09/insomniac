@@ -51,9 +51,11 @@ swift "$PWD/Scripts/make_dmg_background.swift" "$STAGE/.background/bg.png" >/dev
 # A copyable command file, so users can grab the command from the DMG itself
 # (the website also has a Copy button).
 cat > "$STAGE/Copy command.txt" <<'TXT'
-Copy the line below 👇
+Copy the line below and paste and run in terminal 👇
 
 xattr -dr com.apple.quarantine /Applications/insomniac.app
+
+then open app
 TXT
 
 # --- Build a read-write DMG, lay out the install window, then compress -------

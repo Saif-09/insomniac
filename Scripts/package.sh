@@ -51,15 +51,9 @@ swift "$PWD/Scripts/make_dmg_background.swift" "$STAGE/.background/bg.png" >/dev
 # A copyable command file, so users can grab the command from the DMG itself
 # (the website also has a Copy button).
 cat > "$STAGE/Copy command.txt" <<'TXT'
-Insomniac — one-time setup
-
-Copy the line below, paste it into Terminal, and press Return.
-Then open Insomniac normally.
+Copy the line below 👇
 
 xattr -dr com.apple.quarantine /Applications/insomniac.app
-
-(It's code-signed and safe — this only clears Apple's "unverified"
-block that applies to apps not yet notarized through Apple.)
 TXT
 
 # --- Build a read-write DMG, lay out the install window, then compress -------

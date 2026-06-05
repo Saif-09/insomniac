@@ -5,7 +5,7 @@ prevents clamshell sleep (no external display required) and actively advises how
 long that's safe based on the machine's live thermal state, auto-stopping before
 things get too hot.
 
-### 🌙 [**Download &amp; install → saif-09.github.io/insomniac**](https://saif-09.github.io/insomniac/)
+### [**Download &amp; install → saif-09.github.io/insomniac**](https://saif-09.github.io/insomniac/)
 
 The landing page has the download and a one-minute setup guide. Direct link to
 the latest build:

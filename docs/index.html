@@ -217,6 +217,39 @@
   .copy:hover { background: var(--accent-2); }
   .copy.done { background: var(--green); }
 
+  /* small asterisk note under the hero download */
+  .req-note { font-size: 12.5px; color: var(--faint); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+  .req-note:hover { color: var(--muted); }
+
+  /* compact heads-up between steps 1 and 2 */
+  .heads-up { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-radius: 14px; background: linear-gradient(180deg, rgba(246,195,36,0.1), rgba(246,195,36,0.035)); border: 1px solid rgba(246,195,36,0.28); }
+  .heads-up svg { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 2px; }
+  .heads-up p { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  .heads-up strong { color: var(--text); }
+
+  /* ── Gatekeeper reassurance ──────────────────────── */
+  .security { max-width: 760px; margin: 32px auto 0; display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid var(--stroke); border-radius: 22px; padding: 30px 32px; }
+  .security h3 { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .security p { color: var(--muted); font-size: 14.5px; }
+  .security p + p { margin-top: 10px; }
+  .security .tag { display: inline-block; font-size: 12px; font-weight: 650; color: var(--green); background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.24); padding: 4px 11px; border-radius: 999px; margin-bottom: 13px; }
+  .kbd { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; font-size: 13px; font-family: "SF Mono", ui-monospace, Menlo, monospace; }
+
+  /* macOS alert replica — matched to the real Gatekeeper dialog */
+  .gk { width: 270px; flex: 0 0 270px; border-radius: 22px; padding: 22px 22px 18px; text-align: left; position: relative;
+    background: radial-gradient(120% 80% at 40% 14%, rgba(255,255,255,0.06), transparent 60%), #2b2b2f;
+    border: 1px solid rgba(255,255,255,0.07); box-shadow: 0 30px 72px rgba(0,0,0,0.62); }
+  .gk-help { position: absolute; top: 16px; right: 18px; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); color: #c4c4ca; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+  .gk-icon { position: relative; width: 66px; height: 66px; margin: 6px 0 18px; }
+  .gk-icon img { display: block; width: 66px; height: 66px; }
+  .gk-warn { position: absolute; right: -4px; bottom: -4px; width: 33px; height: 33px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.45)); }
+  .gk-title { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.01em; margin-bottom: 9px; }
+  .gk-body { font-size: 14px; line-height: 1.42; color: #e4e4e8; margin-bottom: 20px; }
+  .gk-btns { display: flex; gap: 11px; }
+  .gk-btn { flex: 1; text-align: center; font-size: 14px; font-weight: 500; padding: 9px 0; border-radius: 12px; border: none; background: rgba(255,255,255,0.11); color: #fff; }
+  @media (max-width: 680px) { .security { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 24px; } }
+
   .note { max-width: 720px; margin: 0 auto; background: linear-gradient(180deg, rgba(59,130,246,0.09), rgba(59,130,246,0.03)); border: 1px solid rgba(110,160,255,0.22); border-radius: 20px; padding: 20px 24px; }
   .note p { color: var(--muted); font-size: 14.5px; }
   .note strong { color: var(--text); }
@@ -268,6 +301,7 @@
         Download for macOS
       </a>
       <span class="req">macOS 14 (Sonoma) or later · Apple Silicon &amp; Intel</span>
+      <a class="req-note" id="setupHint" href="#setup">* First launch needs one quick Terminal step — follow the 3-step setup below before opening ↓</a>
     </div>
 
     <div class="stage">
@@ -423,33 +457,63 @@
   <div class="wrap">
     <p class="eyebrow">Get started</p>
     <h2>Set up in three steps</h2>
-    <p class="sub">About a minute. The Terminal step is needed only once.</p>
+    <p class="sub">About a minute. Do them in order and you'll never hit a security warning.</p>
     <div class="steps">
       <div class="step">
         <div class="num">1</div>
         <div>
-          <h3>Download &amp; install</h3>
-          <p>Open the downloaded <code>insomniac.dmg</code>, then drag <strong>Insomniac</strong> onto the <strong>Applications</strong> folder. You can eject the disk image afterward.</p>
+          <h3>Install</h3>
+          <p>Open the downloaded <code>insomniac.dmg</code> and drag <strong>Insomniac</strong> onto the <strong>Applications</strong> folder. You can eject the disk image afterward.</p>
         </div>
       </div>
+
+      <div class="heads-up">
+        <svg viewBox="0 0 36 36" aria-hidden="true"><path d="M18 4.5l14.2 24.6a2 2 0 0 1-1.73 3H5.53a2 2 0 0 1-1.73-3L18 4.5z" fill="#f6c324"/><path d="M18 13.2v8.1" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="18" cy="25.6" r="1.6" fill="#fff"/></svg>
+        <p><strong>Opened it already and macOS said it “can't be verified”? Don't panic — that's expected</strong> for a not-yet-notarized app, not a sign anything's wrong. Click <strong>Done</strong> (never “Move to Bin”), then do step 2. <a id="gkInfoLink" href="#security">See what it looks like ↓</a></p>
+      </div>
+
       <div class="step">
         <div class="num">2</div>
         <div>
-          <h3>Allow it to open (one time)</h3>
-          <p>This is a free test build (not yet through Apple's paid notarization), so macOS blocks it at first. Open <strong>Terminal</strong> (<code>⌘ Space</code> → “Terminal” → Return), paste this, and press Return:</p>
+          <h3>Clear it for launch — <em>before</em> you open it</h3>
+          <p>This is a free test build (not yet through Apple's paid notarization), so macOS quarantines it. Open <strong>Terminal</strong> (<code>⌘ Space</code> → “Terminal” → Return), paste this, and press Return:</p>
           <div class="cmd">
             <code id="cmdText">xattr -dr com.apple.quarantine /Applications/insomniac.app</code>
             <button class="copy" id="copyBtn">Copy</button>
           </div>
-          <p style="margin-top:10px; font-size:13.5px;">Then open <strong>Insomniac</strong> from Applications — it launches normally from then on.</p>
+          <p style="margin-top:10px; font-size:13.5px;">Run this <strong>before the first launch</strong> and the “Not Opened” warning below never appears. (Already saw it? No harm — just run this, then open again.)</p>
         </div>
       </div>
       <div class="step">
         <div class="num">3</div>
         <div>
-          <h3>Find it &amp; use it</h3>
-          <p>Insomniac has no Dock icon — it lives in the <strong>menu bar</strong> at the <strong>top-right of your screen</strong>. Look for the <svg class="moonicon" viewBox="0 0 24 24" fill="none"><path d="M17.5 14.2A7 7 0 1 1 9.8 6.5 5.6 5.6 0 0 0 17.5 14.2Z" fill="currentColor"/><path d="M14.3 3.6h3.4l-3.4 3.4h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.3 8.3h2.2l-2.2 2.2h2.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> moon (a welcome guide points right at it on first launch). Click it, flip <em>Stay Awake</em> on, and enter your Mac password when asked.</p>
+          <h3>Open it &amp; find it</h3>
+          <p>Open <strong>Insomniac</strong> from Applications — it launches cleanly from now on. It has no Dock icon; it lives in the <strong>menu bar</strong> at the <strong>top-right of your screen</strong>. Look for the <svg class="moonicon" viewBox="0 0 24 24" fill="none"><path d="M17.5 14.2A7 7 0 1 1 9.8 6.5 5.6 5.6 0 0 0 17.5 14.2Z" fill="currentColor"/><path d="M14.3 3.6h3.4l-3.4 3.4h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.3 8.3h2.2l-2.2 2.2h2.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> moon (a welcome guide points right at it on first launch). Click it, flip <em>Stay Awake</em> on, and enter your Mac password when asked.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Gatekeeper reassurance: what the warning looks like + why it's safe -->
+    <div class="security" id="security">
+      <div class="gk" role="img" aria-label="macOS dialog reading: Insomniac Not Opened. Apple could not verify Insomniac is free of malware.">
+        <span class="gk-help">?</span>
+        <div class="gk-icon">
+          <img src="security-icon.png" alt="" />
+          <svg class="gk-warn" viewBox="0 0 36 36"><path d="M18 4.5l14.2 24.6a2 2 0 0 1-1.73 3H5.53a2 2 0 0 1-1.73-3L18 4.5z" fill="#f6c324"/><path d="M18 13.2v8.1" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="18" cy="25.6" r="1.6" fill="#fff"/></svg>
+        </div>
+        <div class="gk-title">“Insomniac” Not Opened</div>
+        <div class="gk-body">Apple could not verify “Insomniac” is free of malware that may harm your Mac or compromise your privacy.</div>
+        <div class="gk-btns">
+          <span class="gk-btn">Done</span>
+          <span class="gk-btn">Move to Bin</span>
+        </div>
+      </div>
+      <div>
+        <span class="tag">Expected · safe · one-time</span>
+        <h3>If you see this, don't panic.</h3>
+        <p>Insomniac <strong>is code-signed</strong> — it just isn't <em>notarized</em> yet (that needs Apple's paid Developer Program). macOS shows this for <strong>any</strong> app installed outside the App Store without notarization. It's not a sign that anything is wrong with the app.</p>
+        <p>If it appears: click <strong style="color:var(--green)">Done</strong> — <strong>never “Move to Bin.”</strong> Then run the <span class="kbd">xattr</span> command in step 2 and open the app again.</p>
+        <p><strong>Best of all:</strong> run that command <em>before</em> your first launch (as in step 2) and this dialog never shows up at all.</p>
       </div>
     </div>
   </div>
@@ -460,8 +524,11 @@
   <div class="wrap">
     <p class="eyebrow">Changelog</p>
     <h2>What's new</h2>
-    <p class="sub">Version 1.0.1 — latest test release</p>
+    <p class="sub">Version 1.0.2 — latest test release</p>
     <div class="note">
+      <p><svg class="moonicon" viewBox="0 0 24 24" fill="none"><path d="M17.5 14.2A7 7 0 1 1 9.8 6.5 5.6 5.6 0 0 0 17.5 14.2Z" fill="currentColor"/><path d="M14.3 3.6h3.4l-3.4 3.4h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.3 8.3h2.2l-2.2 2.2h2.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> <strong>1.0.2</strong> — <strong>Custom auto-off length:</strong> pick any duration from 10 minutes to 8 hours with a slider, alongside the presets. <strong>Redesigned settings:</strong> a cleaner, grouped macOS System Settings–style layout with aligned rows.</p>
+    </div>
+    <div class="note" style="margin-top:14px;">
       <p><svg class="moonicon" viewBox="0 0 24 24" fill="none"><path d="M17.5 14.2A7 7 0 1 1 9.8 6.5 5.6 5.6 0 0 0 17.5 14.2Z" fill="currentColor"/><path d="M14.3 3.6h3.4l-3.4 3.4h3.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.3 8.3h2.2l-2.2 2.2h2.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> <strong>1.0.1</strong> — Bug fixes for low-battery behavior. The safety advisor now factors in battery level, so it no longer suggests a long session when the battery is low. Turning Stay Awake on when the battery is already at or below your auto-stop limit now shows a clear "plug in first" message instead of asking for your password twice in a row. Also new: an option to turn the screen off when you close the lid during a session.</p>
     </div>
     <div class="note" style="margin-top:14px;">
@@ -485,8 +552,20 @@
     const el = document.getElementById(pair[0]);
     if (DOWNLOAD_URL && DOWNLOAD_URL !== "REPLACE_WITH_YOUR_LINK") el.href = DOWNLOAD_URL;
     else el.addEventListener("click", function (e) { e.preventDefault(); alert("Set DOWNLOAD_URL to your .dmg link."); });
-    el.addEventListener("click", function () { track("download_clicked", { location: pair[1] }); });
+    el.addEventListener("click", function () {
+      track("download_clicked", { location: pair[1] });
+      // The .dmg downloads in the background — send the reader straight to the
+      // setup steps so they don't hit the first-launch warning unprepared.
+      var setup = document.getElementById("setup");
+      if (setup) setTimeout(function () { setup.scrollIntoView({ behavior: "smooth", block: "start" }); }, 400);
+    });
   });
+
+  // New first-run-UX interactions.
+  var setupHint = document.getElementById("setupHint");
+  if (setupHint) setupHint.addEventListener("click", function () { track("setup_hint_clicked", { location: "hero" }); });
+  var gkInfoLink = document.getElementById("gkInfoLink");
+  if (gkInfoLink) gkInfoLink.addEventListener("click", function () { track("gatekeeper_info_clicked", { location: "setup" }); });
 
   const copyBtn = document.getElementById("copyBtn");
   copyBtn.addEventListener("click", function () {
@@ -508,7 +587,7 @@
         }
       });
     }, { threshold: 0.4 });
-    ["features", "usecases", "setup"].forEach(function (id) {
+    ["features", "usecases", "setup", "security"].forEach(function (id) {
       var s = document.getElementById(id); if (s) io.observe(s);
     });
   }

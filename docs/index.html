@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Insomniac — Keep your Mac awake, safely</title>
+<meta name="description" content="A tiny macOS menu-bar app that keeps your Mac awake — even with the lid closed — with thermal and battery safety built in." />
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     ⬇️  STEP 1 of going live: paste your download link below.
+     Put your .dmg on Google Drive / Dropbox / GitHub Release, copy
+     the *direct download* link, and replace REPLACE_WITH_YOUR_LINK.
+     (For Google Drive, use a share link set to "Anyone with the link".)
+     ───────────────────────────────────────────────────────────── */
+  :root {
+    --accent: #2f6bff;
+    --accent-soft: #5b8bff;
+    --bg: #0b0d12;
+    --bg-2: #12151d;
+    --card: #161a24;
+    --stroke: #232838;
+    --text: #eef1f7;
+    --muted: #9aa3b6;
+    --code-bg: #0e1118;
+    --green: #34c759;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -200px, rgba(47,107,255,0.18), transparent 70%), var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 22px; }
+  a { color: var(--accent-soft); }
+
+  /* Hero */
+  header { text-align: center; padding: 88px 0 56px; }
+  .icon {
+    width: 116px; height: 116px; border-radius: 26px;
+    box-shadow: 0 20px 50px rgba(47,107,255,0.35), 0 4px 14px rgba(0,0,0,0.4);
+    margin-bottom: 26px;
+  }
+  h1 { font-size: 48px; letter-spacing: -0.02em; font-weight: 800; }
+  .tagline { font-size: 20px; color: var(--muted); margin-top: 12px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  .cta { margin-top: 34px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(180deg, var(--accent-soft), var(--accent));
+    color: #fff; font-size: 18px; font-weight: 650;
+    padding: 15px 30px; border-radius: 14px; text-decoration: none;
+    box-shadow: 0 10px 30px rgba(47,107,255,0.4);
+    transition: transform .12s ease, box-shadow .12s ease;
+    border: none; cursor: pointer;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(47,107,255,0.5); }
+  .btn svg { width: 20px; height: 20px; }
+  .req { font-size: 13px; color: var(--muted); }
+
+  /* Sections */
+  section { padding: 40px 0; }
+  h2 { font-size: 28px; font-weight: 750; letter-spacing: -0.01em; text-align: center; margin-bottom: 8px; }
+  .sub { text-align: center; color: var(--muted); margin-bottom: 34px; }
+
+  /* Features */
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .feature {
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
+    padding: 22px;
+  }
+  .feature .emoji { font-size: 24px; }
+  .feature h3 { font-size: 17px; margin: 10px 0 4px; }
+  .feature p { color: var(--muted); font-size: 14.5px; }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step {
+    display: flex; gap: 18px;
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .num {
+    flex: 0 0 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(180deg, var(--accent-soft), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 750; font-size: 18px;
+  }
+  .step h3 { font-size: 18px; margin-bottom: 4px; }
+  .step p { color: var(--muted); font-size: 15px; }
+  .step .small { font-size: 13px; }
+
+  /* Command box */
+  .cmd {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--code-bg); border: 1px solid var(--stroke); border-radius: 12px;
+    padding: 12px 14px; margin-top: 12px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13.5px;
+    overflow-x: auto;
+  }
+  .cmd code { color: #cdd6f4; white-space: nowrap; }
+  .copy {
+    flex: 0 0 auto; background: var(--accent); color: #fff; border: none;
+    border-radius: 8px; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background .12s ease;
+  }
+  .copy:hover { background: var(--accent-soft); }
+  .copy.done { background: var(--green); }
+
+  /* Callout */
+  .note {
+    background: rgba(47,107,255,0.08); border: 1px solid rgba(47,107,255,0.3);
+    border-radius: var(--radius); padding: 18px 22px; margin-top: 8px;
+  }
+  .note strong { color: var(--text); }
+  .note p { color: var(--muted); font-size: 14.5px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 50px 0 70px; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 36px; }
+    .features { grid-template-columns: 1fr; }
+    .step { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img class="icon" src="icon.png" alt="Insomniac app icon" />
+    <h1>Insomniac</h1>
+    <p class="tagline">Keep your Mac awake — even with the lid closed — without cooking it.</p>
+    <div class="cta">
+      <a class="btn" id="downloadBtn" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+        Download for macOS
+      </a>
+      <span class="req">Version 1.0 · macOS 14 (Sonoma) or later · Apple Silicon &amp; Intel</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>What it does</h2>
+    <p class="sub">One switch in your menu bar. Smart safety underneath.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="emoji">💻</div>
+        <h3>Lid-closed stay-awake</h3>
+        <p>Flip one switch and your Mac keeps running with the lid shut — perfect for downloads, renders, or an external display.</p>
+      </div>
+      <div class="feature">
+        <div class="emoji">⏱️</div>
+        <h3>Auto-off timer</h3>
+        <p>Pick a duration and it turns itself off automatically, so you never forget and drain the battery.</p>
+      </div>
+      <div class="feature">
+        <div class="emoji">🌡️</div>
+        <h3>Thermal &amp; battery safety</h3>
+        <p>Stops on its own if your Mac gets too hot or the battery runs low — it protects your hardware.</p>
+      </div>
+      <div class="feature">
+        <div class="emoji">✨</div>
+        <h3>Smart advice</h3>
+        <p>Suggests a safe duration based on heat, power source, and system load before you start.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Set up in 3 steps</h2>
+    <p class="sub">Takes about a minute. The Terminal step is needed only once.</p>
+    <div class="steps">
+
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <h3>Download &amp; install</h3>
+          <p>Open the downloaded <code>insomniac.dmg</code>, then drag the <strong>Insomniac</strong> icon onto the <strong>Applications</strong> folder. You can eject the disk image afterward.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <h3>Allow it to open (one time)</h3>
+          <p>Because this is a free test build (not yet signed through Apple's paid program), macOS blocks it at first. To allow it, open <strong>Terminal</strong> (press <code>⌘ Space</code>, type “Terminal”, hit Return) and paste this command, then press Return:</p>
+          <div class="cmd">
+            <code id="cmdText">xattr -dr com.apple.quarantine /Applications/insomniac.app</code>
+            <button class="copy" id="copyBtn">Copy</button>
+          </div>
+          <p class="small" style="margin-top:10px;">Now open <strong>Insomniac</strong> from your Applications folder. It’ll launch normally from then on.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <h3>Find it &amp; use it</h3>
+          <p>Insomniac has no Dock icon — it lives in the <strong>menu bar</strong> at the <strong>top-right of your screen</strong>. Look for the 🌙 moon icon (a welcome guide will point right at it on first launch). Click it, flip <em>Stay Awake</em> on, and when prompted, enter your Mac password — that’s the normal macOS approval.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="note">
+      <p><strong>Is the Terminal step safe?</strong> Yes. That command just removes the “downloaded from the internet” quarantine flag macOS adds to any file from a browser or AirDrop. It’s the standard way to run apps that haven’t gone through Apple’s $99/yr notarization yet. Insomniac collects no data and has no network tracking.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What’s new</h2>
+    <p class="sub">Version 1.0 — first test release</p>
+    <div class="note">
+      <p>
+        🌙 First public test build. Includes lid-closed stay-awake, the auto-off timer,
+        automatic thermal &amp; battery safety cutoffs, and a first-launch welcome guide
+        that points you to the menu-bar icon.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Insomniac · a little menu-bar utility · shared for testing 🌙
+  </div>
+</footer>
+
+<script>
+  // ── Your download link ───────────────────────────────────────────────
+  // Paste the link to your hosted .dmg here (Google Drive, Dropbox, GitHub
+  // Release, etc.). For Google Drive, set sharing to "Anyone with the link".
+  // Always points at the .dmg attached to the latest GitHub Release —
+  // re-running package.sh + a new release updates it with no page changes.
+  const DOWNLOAD_URL = "https://github.com/Saif-09/insomniac/releases/latest/download/insomniac.dmg";
+
+  const btn = document.getElementById("downloadBtn");
+  if (DOWNLOAD_URL && DOWNLOAD_URL !== "REPLACE_WITH_YOUR_LINK") {
+    btn.href = DOWNLOAD_URL;
+  } else {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      alert("Set DOWNLOAD_URL in this page's script to your .dmg link.");
+    });
+  }
+
+  // ── Copy-to-clipboard for the Terminal command ───────────────────────
+  const copyBtn = document.getElementById("copyBtn");
+  copyBtn.addEventListener("click", function () {
+    const text = document.getElementById("cmdText").textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      copyBtn.textContent = "Copied!";
+      copyBtn.classList.add("done");
+      setTimeout(function () {
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("done");
+      }, 1800);
+    });
+  });
+</script>
+
+</body>
+</html>

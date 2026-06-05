@@ -10,6 +10,10 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Strip our own Gatekeeper quarantine so the "Not Opened" warning never
+        // recurs for this build (best-effort, off the main thread).
+        QuarantineCleaner.selfHeal()
+
         MainActor.assumeIsolated {
             // Show the walkthrough on every launch (quit → reopen shows it
             // again), introducing the app and pointing users to the menu-bar

@@ -40,13 +40,47 @@ else
   echo "⚠ No 'Developer ID Application' certificate — DMG will be un-notarized."
 fi
 
-# --- Stage (use ditto, NOT cp -R, to preserve the signature) -----------------
-STAGE="$BUILD_DIR/stage"; mkdir -p "$STAGE"
+# --- Stage (ditto preserves the signature; cp -R would not) ------------------
+STAGE="$BUILD_DIR/stage"; rm -rf "$STAGE"; mkdir -p "$STAGE/.background"
 ditto "$APP" "$STAGE/$APP_NAME"
 ln -s /Applications "$STAGE/Applications"
 
-echo "▶ Creating DMG…"
-hdiutil create -volname "$VOL" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+echo "▶ Rendering install-window background…"
+swift "$PWD/Scripts/make_dmg_background.swift" "$STAGE/.background/bg.png" >/dev/null
+
+# --- Build a read-write DMG, lay out the install window, then compress -------
+echo "▶ Building styled DMG…"
+# Detach any stale mounts from earlier runs, or Finder targets the wrong disk.
+for v in /Volumes/"$VOL"*; do [ -d "$v" ] && hdiutil detach "$v" -force >/dev/null 2>&1 || true; done
+RW="$BUILD_DIR/rw.dmg"; rm -f "$RW"
+hdiutil create -volname "$VOL" -srcfolder "$STAGE" -fs HFS+ -format UDRW -ov "$RW" >/dev/null
+hdiutil attach "$RW" -nobrowse -noautoopen >/dev/null
+sleep 1
+osascript <<OSA || echo "⚠ Finder layout skipped (allow “control Finder” if prompted). DMG still builds."
+tell application "Finder"
+  tell disk "$VOL"
+    open
+    set current view of container window to icon view
+    set toolbar visible of container window to false
+    set statusbar visible of container window to false
+    set the bounds of container window to {220, 160, 920, 658}
+    set vo to the icon view options of container window
+    set arrangement of vo to not arranged
+    set icon size of vo to 100
+    set text size of vo to 12
+    set background picture of vo to file ".background:bg.png"
+    set position of item "$APP_NAME" of container window to {205, 185}
+    set position of item "Applications" of container window to {495, 185}
+    update without registering applications
+    delay 1
+    close
+  end tell
+end tell
+OSA
+sync; sleep 1
+hdiutil detach "/Volumes/$VOL" >/dev/null 2>&1 || hdiutil detach "/Volumes/$VOL" -force >/dev/null 2>&1
+hdiutil convert "$RW" -format UDZO -imagekey zlib-level=9 -ov -o "$DMG" >/dev/null
+rm -f "$RW"
 
 # --- Optional: notarize + staple (needs DevID + NOTARY_PROFILE) --------------
 if [ -n "$DEVID" ] && [ -n "$NOTARY_PROFILE" ]; then

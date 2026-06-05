@@ -6,269 +6,461 @@
 <title>Insomniac — Keep your Mac awake, safely</title>
 <meta name="description" content="A tiny macOS menu-bar app that keeps your Mac awake — even with the lid closed — with thermal and battery safety built in." />
 <style>
-  /* ─────────────────────────────────────────────────────────────
-     ⬇️  STEP 1 of going live: paste your download link below.
-     Put your .dmg on Google Drive / Dropbox / GitHub Release, copy
-     the *direct download* link, and replace REPLACE_WITH_YOUR_LINK.
-     (For Google Drive, use a share link set to "Anyone with the link".)
-     ───────────────────────────────────────────────────────────── */
   :root {
-    --accent: #2f6bff;
-    --accent-soft: #5b8bff;
-    --bg: #0b0d12;
-    --bg-2: #12151d;
-    --card: #161a24;
-    --stroke: #232838;
-    --text: #eef1f7;
-    --muted: #9aa3b6;
-    --code-bg: #0e1118;
+    --accent: #3b82f6;
+    --accent-2: #6ea0ff;
+    --bg: #07080b;
+    --surface: rgba(255,255,255,0.04);
+    --surface-2: rgba(255,255,255,0.06);
+    --stroke: rgba(255,255,255,0.085);
+    --stroke-2: rgba(255,255,255,0.14);
+    --text: #f4f6fb;
+    --muted: #8b93a7;
+    --faint: #5b6273;
     --green: #34c759;
-    --radius: 18px;
+    --maxw: 1080px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
-    background: radial-gradient(1200px 600px at 50% -200px, rgba(47,107,255,0.18), transparent 70%), var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 22px; }
-  a { color: var(--accent-soft); }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(900px 520px at 50% -180px, rgba(59,130,246,0.26), transparent 70%),
+      radial-gradient(720px 420px at 88% 6%, rgba(124,92,255,0.12), transparent 70%),
+      radial-gradient(620px 380px at 8% 10%, rgba(59,130,246,0.10), transparent 70%);
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  a { color: var(--accent-2); text-decoration: none; }
+
+  /* Nav */
+  nav { position: sticky; top: 0; z-index: 50; backdrop-filter: saturate(170%) blur(16px); -webkit-backdrop-filter: saturate(170%) blur(16px); background: rgba(8,9,13,0.72); border-bottom: 1px solid var(--stroke); }
+  .nav-in { position: relative; display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
+  .brand img { width: 27px; height: 27px; border-radius: 8px; box-shadow: 0 3px 10px rgba(59,130,246,0.35); }
+  /* centered section links */
+  .nav-links { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 30px; }
+  .nav-links a { font-size: 14px; font-weight: 550; color: var(--muted); transition: color .15s ease; }
+  .nav-links a:hover { color: var(--text); }
+  /* primary download pill */
+  .nav-dl { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 650; color: #fff; background: linear-gradient(180deg, var(--accent-2), var(--accent)); border: none; padding: 9px 17px; border-radius: 11px; box-shadow: 0 6px 18px rgba(59,130,246,0.38), inset 0 1px 0 rgba(255,255,255,0.28); transition: transform .12s ease, box-shadow .12s ease; }
+  .nav-dl svg { width: 15px; height: 15px; }
+  .nav-dl:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(59,130,246,0.5), inset 0 1px 0 rgba(255,255,255,0.28); }
 
   /* Hero */
-  header { text-align: center; padding: 88px 0 56px; }
-  .icon {
-    width: 116px; height: 116px; border-radius: 26px;
-    box-shadow: 0 20px 50px rgba(47,107,255,0.35), 0 4px 14px rgba(0,0,0,0.4);
-    margin-bottom: 26px;
-  }
-  h1 { font-size: 48px; letter-spacing: -0.02em; font-weight: 800; }
-  .tagline { font-size: 20px; color: var(--muted); margin-top: 12px; max-width: 560px; margin-left: auto; margin-right: auto; }
+  header { text-align: center; padding: 90px 0 36px; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); font-weight: 550; border: 1px solid var(--stroke); border-radius: 999px; padding: 6px 14px; background: var(--surface); margin-bottom: 26px; }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  h1 { font-size: clamp(40px, 7vw, 64px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; background: linear-gradient(180deg, #ffffff, #b9c2d8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .tagline { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); margin: 18px auto 0; max-width: 560px; }
+  .cta { margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; font-size: 17px; font-weight: 650; letter-spacing: -0.01em; padding: 15px 30px; border-radius: 13px; cursor: pointer; border: none; box-shadow: 0 10px 34px rgba(59,130,246,0.42), inset 0 1px 0 rgba(255,255,255,0.25); transition: transform .12s ease, box-shadow .12s ease; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 44px rgba(59,130,246,0.55), inset 0 1px 0 rgba(255,255,255,0.25); }
+  .btn svg { width: 19px; height: 19px; }
+  .req { font-size: 13px; color: var(--faint); }
 
-  .cta { margin-top: 34px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(180deg, var(--accent-soft), var(--accent));
-    color: #fff; font-size: 18px; font-weight: 650;
-    padding: 15px 30px; border-radius: 14px; text-decoration: none;
-    box-shadow: 0 10px 30px rgba(47,107,255,0.4);
-    transition: transform .12s ease, box-shadow .12s ease;
-    border: none; cursor: pointer;
-  }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(47,107,255,0.5); }
-  .btn svg { width: 20px; height: 20px; }
-  .req { font-size: 13px; color: var(--muted); }
+  /* Product mockup */
+  .stage { position: relative; margin: 54px auto 0; max-width: 560px; padding: 0 10px; }
+  .macbar { display: flex; align-items: center; justify-content: flex-end; gap: 18px; height: 30px; padding: 0 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--stroke); border-bottom: none; border-radius: 12px 12px 0 0; color: var(--faint); }
+  .macbar svg { width: 15px; height: 15px; opacity: 0.6; }
+  .macbar .moon { color: var(--accent-2); opacity: 1; filter: drop-shadow(0 0 8px rgba(110,160,255,0.7)); }
+  .macbar .time { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+  .panel { width: 300px; margin: 0 auto; transform: translateX(86px); background: linear-gradient(180deg, rgba(22,25,33,0.97), rgba(16,18,25,0.97)); border: 1px solid var(--stroke-2); border-radius: 16px; box-shadow: 0 30px 70px rgba(0,0,0,0.6); padding: 14px; text-align: left; position: relative; }
+  .panel::before { content: ""; position: absolute; top: -7px; right: 40px; width: 14px; height: 14px; rotate: 45deg; background: rgb(22,25,33); border-left: 1px solid var(--stroke-2); border-top: 1px solid var(--stroke-2); }
+  .p-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+  .p-logo { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(140deg, var(--accent-2), var(--accent)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+  .p-logo svg { width: 14px; height: 14px; color: #fff; }
+  .p-title { font-weight: 700; font-size: 15px; }
+  .p-status { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 4px rgba(110,160,255,0.18); }
+  .pcard { border-radius: 12px; padding: 12px; border: 1px solid var(--stroke); background: var(--surface); }
+  .pcard + .pcard { margin-top: 10px; }
+  .pcard.active { border-color: rgba(110,160,255,0.30); background: rgba(59,130,246,0.10); }
+  .hero-row { display: flex; align-items: center; gap: 12px; }
+  .ring { width: 44px; height: 44px; flex: 0 0 44px; }
+  .hero-txt { flex: 1; min-width: 0; }
+  .hero-txt .t1 { font-size: 14px; font-weight: 650; }
+  .hero-txt .t2 { font-size: 11.5px; color: var(--muted); }
+  .switch { width: 38px; height: 23px; border-radius: 999px; flex: 0 0 38px; background: linear-gradient(180deg, var(--accent-2), var(--accent)); position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
+  .switch::after { content:""; position: absolute; top: 2px; right: 2px; width: 19px; height: 19px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .pdiv { height: 1px; background: var(--stroke); margin: 11px 0; }
+  .prow { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+  .chip-select { display: flex; align-items: center; gap: 5px; color: var(--text); font-weight: 600; background: var(--surface-2); border: 1px solid var(--stroke); padding: 4px 9px; border-radius: 7px; font-size: 12px; }
+  .adv-head { display: flex; align-items: center; gap: 9px; }
+  .adv-ic { width: 26px; height: 26px; border-radius: 50%; background: rgba(52,199,89,0.18); display:flex; align-items:center; justify-content:center; }
+  .adv-ic svg { width: 14px; height: 14px; color: var(--green); }
+  .adv-label { font-size: 13px; font-weight: 650; color: var(--green); }
+  .adv-sub { margin-left: auto; font-size: 11px; color: var(--faint); }
+  .adv-msg { font-size: 11.5px; color: var(--muted); margin: 8px 0 9px; }
+  .chips { display: flex; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: var(--muted); background: var(--surface-2); border: 1px solid var(--stroke); padding: 3px 8px; border-radius: 999px; }
+  .chip svg { width: 11px; height: 11px; }
 
   /* Sections */
-  section { padding: 40px 0; }
-  h2 { font-size: 28px; font-weight: 750; letter-spacing: -0.01em; text-align: center; margin-bottom: 8px; }
-  .sub { text-align: center; color: var(--muted); margin-bottom: 34px; }
+  section { padding: 62px 0; scroll-margin-top: 80px; }
+  .eyebrow { text-align: center; font-size: 13px; font-weight: 650; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 10px; }
+  h2 { font-size: clamp(26px, 4vw, 33px); font-weight: 750; letter-spacing: -0.01em; text-align: center; }
+  .sub { text-align: center; color: var(--muted); margin: 10px auto 42px; max-width: 540px; }
 
-  /* Features */
-  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .feature {
-    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
-    padding: 22px;
+  /* ── Bento ───────────────────────────────────────── */
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(126px, auto); grid-auto-flow: row dense; gap: 16px; max-width: 940px; margin: 0 auto; }
+  .tile {
+    position: relative; isolation: isolate; overflow: hidden;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.018));
+    border: 1px solid var(--stroke); border-radius: 22px; padding: 24px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 16px 36px rgba(0,0,0,0.34);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
   }
-  .feature .emoji { font-size: 24px; }
-  .feature h3 { font-size: 17px; margin: 10px 0 4px; }
-  .feature p { color: var(--muted); font-size: 14.5px; }
+  .tile::before { content: ""; position: absolute; top: 0; left: 18px; right: 18px; height: 1px; z-index: 3; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); }
+  .tile::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .25s ease; background: radial-gradient(460px 200px at 22% -10%, rgba(59,130,246,0.2), transparent 70%); }
+  .tile:hover { transform: translateY(-3px); border-color: rgba(110,160,255,0.34); box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 24px 54px rgba(0,0,0,0.44), 0 0 0 1px rgba(110,160,255,0.12); }
+  .tile:hover::after { opacity: 1; }
+  .tile.lg { grid-column: span 2; }
+  .tile.tall { grid-row: span 2; }
 
-  /* Steps */
-  .steps { display: flex; flex-direction: column; gap: 16px; }
-  .step {
-    display: flex; gap: 18px;
-    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius);
-    padding: 22px 24px;
+  /* full-width hero feature: copy on the left, live demo on the right */
+  .tile.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 30px; padding: 28px 30px; }
+  .tile.wide .tcopy { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .tile.wide .tcopy .live { margin-top: 16px; }
+  .demo {
+    flex: 0 0 286px; align-self: center;
+    background: linear-gradient(180deg, rgba(24,27,36,0.95), rgba(16,18,25,0.95));
+    border: 1px solid var(--stroke-2); border-radius: 15px; padding: 14px;
+    box-shadow: 0 16px 38px rgba(0,0,0,0.45);
   }
-  .num {
-    flex: 0 0 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(180deg, var(--accent-soft), var(--accent));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 750; font-size: 18px;
+  .demo .pdiv { margin: 12px 0; }
+  @media (max-width: 760px) {
+    .tile.wide { flex-direction: column; align-items: stretch; }
+    .demo { flex: 1 1 auto; width: 100%; }
   }
-  .step h3 { font-size: 18px; margin-bottom: 4px; }
-  .step p { color: var(--muted); font-size: 15px; }
-  .step .small { font-size: 13px; }
 
-  /* Command box */
-  .cmd {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    background: var(--code-bg); border: 1px solid var(--stroke); border-radius: 12px;
-    padding: 12px 14px; margin-top: 12px;
-    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13.5px;
-    overflow-x: auto;
+  .t-ic { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, #7aa6ff, #3b82f6); box-shadow: 0 8px 20px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -2px 6px rgba(0,0,0,0.18); }
+  .t-ic svg { width: 23px; height: 23px; color: #fff; }
+  .tile h3 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; margin: 16px 0 5px; }
+  .tile p { color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 42ch; }
+
+  /* big watermark icon for texture */
+  .wm { position: absolute; right: -14px; bottom: -20px; width: 118px; height: 118px; color: var(--accent-2); opacity: 0.06; z-index: -1; pointer-events: none; }
+  .tile.lg .wm, .tile.tall .wm { width: 168px; height: 168px; opacity: 0.07; right: -18px; bottom: -26px; }
+
+  /* live status pill (hero tiles) */
+  .live { display: inline-flex; align-items: center; gap: 7px; margin-top: auto; align-self: flex-start; font-size: 12px; font-weight: 600; color: var(--accent-2); background: rgba(59,130,246,0.1); border: 1px solid rgba(110,160,255,0.25); padding: 5px 11px; border-radius: 999px; }
+  .live .ld { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px var(--accent-2); }
+  .live.ok { color: var(--green); background: rgba(52,199,89,0.1); border-color: rgba(52,199,89,0.25); }
+  .live.ok .ld { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .tile.lg p, .tile.tall p { margin-bottom: 18px; }
+
+  /* ── Use-case list (distinct from the bento) ─────── */
+  .uclist {
+    max-width: 760px; margin: 0 auto; overflow: hidden; position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border: 1px solid var(--stroke); border-radius: 22px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 16px 36px rgba(0,0,0,0.34);
   }
+  .uclist::before { content: ""; position: absolute; top: 0; left: 22px; right: 22px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent); }
+  .ucrow { display: flex; align-items: center; gap: 18px; padding: 22px 26px; position: relative; transition: background .18s ease; }
+  .ucrow + .ucrow { border-top: 1px solid var(--stroke); }
+  .ucrow:hover { background: rgba(59,130,246,0.06); }
+  /* accent bar slides in on hover */
+  .ucrow::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: linear-gradient(180deg, var(--accent-2), var(--accent)); transform: scaleY(0); transform-origin: center; transition: transform .2s ease; }
+  .ucrow:hover::before { transform: scaleY(1); }
+  .uc-ic { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(110,160,255,0.12); border: 1px solid rgba(110,160,255,0.22); }
+  .uc-ic svg { width: 21px; height: 21px; color: var(--accent-2); }
+  .uc-body { flex: 1; min-width: 0; }
+  .uc-body h3 { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+  .uc-body p { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+  .uc-badge { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--green); background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.24); padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+  .uc-badge svg { width: 13px; height: 13px; }
+  @media (max-width: 600px) {
+    .uc-badge span { display: none; }
+    .ucrow { padding: 18px 20px; gap: 14px; }
+  }
+
+  /* ── Steps ───────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 14px; max-width: 720px; margin: 0 auto; }
+  .step { position: relative; overflow: hidden; display: flex; gap: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015)); border: 1px solid var(--stroke); border-radius: 20px; padding: 22px 24px; box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset; }
+  .step::before { content: ""; position: absolute; top: 0; left: 18px; right: 18px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); }
+  .num { flex: 0 0 36px; height: 36px; border-radius: 50%; background: linear-gradient(180deg, var(--accent-2), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 750; font-size: 16px; box-shadow: 0 6px 16px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.4); }
+  .step h3 { font-size: 17px; font-weight: 650; margin-bottom: 4px; }
+  .step p { color: var(--muted); font-size: 14.5px; }
+  .step code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; font-size: 13px; }
+  .cmd { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #04050a; border: 1px solid var(--stroke-2); border-radius: 11px; padding: 12px 14px; margin-top: 14px; font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13px; overflow-x: auto; }
   .cmd code { color: #cdd6f4; white-space: nowrap; }
-  .copy {
-    flex: 0 0 auto; background: var(--accent); color: #fff; border: none;
-    border-radius: 8px; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer;
-    transition: background .12s ease;
-  }
-  .copy:hover { background: var(--accent-soft); }
+  .copy { flex: 0 0 auto; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .12s ease; }
+  .copy:hover { background: var(--accent-2); }
   .copy.done { background: var(--green); }
 
-  /* Callout */
-  .note {
-    background: rgba(47,107,255,0.08); border: 1px solid rgba(47,107,255,0.3);
-    border-radius: var(--radius); padding: 18px 22px; margin-top: 8px;
-  }
-  .note strong { color: var(--text); }
+  .note { max-width: 720px; margin: 0 auto; background: linear-gradient(180deg, rgba(59,130,246,0.09), rgba(59,130,246,0.03)); border: 1px solid rgba(110,160,255,0.22); border-radius: 20px; padding: 20px 24px; }
   .note p { color: var(--muted); font-size: 14.5px; }
+  .note strong { color: var(--text); }
 
-  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 50px 0 70px; }
+  footer { text-align: center; color: var(--faint); font-size: 13px; padding: 56px 0 72px; border-top: 1px solid var(--stroke); margin-top: 24px; }
+  footer a { color: var(--muted); }
 
-  @media (max-width: 640px) {
-    h1 { font-size: 36px; }
-    .features { grid-template-columns: 1fr; }
+  @media (max-width: 760px) {
+    .bento { grid-template-columns: 1fr 1fr; }
+    .tile.lg { grid-column: span 2; }
+    .tile.tall { grid-row: span 1; }
     .step { flex-direction: column; gap: 12px; }
+    .panel { transform: translateX(40px); }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 520px) {
+    .bento { grid-template-columns: 1fr; }
+    .tile.lg, .tile.tall { grid-column: span 1; }
   }
 </style>
 </head>
 <body>
 
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#"><img src="icon.png" alt="" /> Insomniac</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#usecases">Use cases</a>
+      <a href="#setup">Setup</a>
+    </div>
+    <a class="nav-dl" id="navDl" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      Download
+    </a>
+  </div>
+</nav>
+
 <header>
   <div class="wrap">
-    <img class="icon" src="icon.png" alt="Insomniac app icon" />
-    <h1>Insomniac</h1>
-    <p class="tagline">Keep your Mac awake — even with the lid closed — without cooking it.</p>
+    <span class="pill"><span class="dot"></span> Version 1.0 · free test build</span>
+    <h1>Keep your Mac awake,<br />without cooking it.</h1>
+    <p class="tagline">A tiny menu-bar app that stops your Mac from sleeping — even with the lid closed — and bows out automatically before it overheats or drains.</p>
     <div class="cta">
       <a class="btn" id="downloadBtn" href="#">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
         Download for macOS
       </a>
-      <span class="req">Version 1.0 · macOS 14 (Sonoma) or later · Apple Silicon &amp; Intel</span>
+      <span class="req">macOS 14 (Sonoma) or later · Apple Silicon &amp; Intel</span>
+    </div>
+
+    <div class="stage">
+      <div class="macbar">
+        <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5a11 11 0 0 1 14 0M8.5 16a6 6 0 0 1 7 0M11 19h2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="18" height="9" rx="2"/><path d="M22 11v3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="15" r="3"/><path d="M3 9h2M11 9h10M3 15h10M19 15h2"/></svg>
+        <span class="time">Fri 9:41</span>
+      </div>
+      <div class="panel">
+        <div class="p-head">
+          <div class="p-logo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 11-13h-7z"/></svg></div>
+          <span class="p-title">Insomniac</span>
+          <span class="p-status"></span>
+        </div>
+        <div class="pcard active">
+          <div class="hero-row">
+            <svg class="ring" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="4"/>
+              <circle cx="22" cy="22" r="19" fill="none" stroke="#6ea0ff" stroke-width="4" stroke-linecap="round" stroke-dasharray="119" stroke-dashoffset="34" transform="rotate(-90 22 22)"/>
+              <text x="22" y="26" text-anchor="middle" font-size="11" fill="#6ea0ff" font-weight="700">⚡</text>
+            </svg>
+            <div class="hero-txt"><div class="t1">Stay Awake</div><div class="t2">Lid-closed sleep prevented · 58:30 left</div></div>
+            <div class="switch"></div>
+          </div>
+          <div class="pdiv"></div>
+          <div class="prow"><span>⏱ Auto-off</span><span class="chip-select">1 hour ▾</span></div>
+        </div>
+        <div class="pcard">
+          <div class="adv-head">
+            <div class="adv-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg></div>
+            <span class="adv-label">Low risk</span>
+            <span class="adv-sub">suggests 1h</span>
+          </div>
+          <p class="adv-msg">Cool and on AC power — safe to keep your Mac awake for a while.</p>
+          <div class="chips">
+            <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg> Nominal</span>
+            <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12z"/></svg> AC</span>
+            <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="17" r="3"/><path d="M12 14V5a2 2 0 0 1 4 0"/></svg> 21°C</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
-<section>
+<!-- ── Features (bento) ─────────────────────────────── -->
+<section id="features">
   <div class="wrap">
-    <h2>What it does</h2>
-    <p class="sub">One switch in your menu bar. Smart safety underneath.</p>
-    <div class="features">
-      <div class="feature">
-        <div class="emoji">💻</div>
-        <h3>Lid-closed stay-awake</h3>
-        <p>Flip one switch and your Mac keeps running with the lid shut — perfect for downloads, renders, or an external display.</p>
+    <p class="eyebrow">Features</p>
+    <h2>One switch. Smart safety underneath.</h2>
+    <p class="sub">Everything you need, nothing you don't.</p>
+    <div class="bento">
+
+      <div class="tile wide">
+        <div class="tcopy">
+          <div class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg></div>
+          <h3>Lid-closed stay-awake</h3>
+          <p>Flip one switch and your Mac keeps running with the lid shut — perfect for downloads, renders, or an external display.</p>
+          <span class="live"><span class="ld"></span> Lid closed · still awake</span>
+        </div>
+        <div class="demo">
+          <div class="hero-row">
+            <svg class="ring" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="4"/>
+              <circle cx="22" cy="22" r="19" fill="none" stroke="#6ea0ff" stroke-width="4" stroke-linecap="round" stroke-dasharray="119" stroke-dashoffset="34" transform="rotate(-90 22 22)"/>
+              <text x="22" y="26" text-anchor="middle" font-size="11" fill="#6ea0ff" font-weight="700">⚡</text>
+            </svg>
+            <div class="hero-txt"><div class="t1">Stay Awake</div><div class="t2">58:30 left</div></div>
+            <div class="switch"></div>
+          </div>
+          <div class="pdiv"></div>
+          <div class="prow"><span>⏱ Auto-off</span><span class="chip-select">1 hour ▾</span></div>
+        </div>
       </div>
-      <div class="feature">
-        <div class="emoji">⏱️</div>
-        <h3>Auto-off timer</h3>
-        <p>Pick a duration and it turns itself off automatically, so you never forget and drain the battery.</p>
-      </div>
-      <div class="feature">
-        <div class="emoji">🌡️</div>
+
+      <div class="tile">
+        <div class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/></svg></div>
         <h3>Thermal &amp; battery safety</h3>
-        <p>Stops on its own if your Mac gets too hot or the battery runs low — it protects your hardware.</p>
+        <p>Stops on its own if your Mac gets too hot or the battery runs low — protecting your hardware.</p>
+        <svg class="wm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/></svg>
       </div>
-      <div class="feature">
-        <div class="emoji">✨</div>
+
+      <div class="tile">
+        <div class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg></div>
+        <h3>Auto-off timer</h3>
+        <p>Pick a duration and it switches off by itself, so you never forget.</p>
+        <svg class="wm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>
+      </div>
+
+      <div class="tile">
+        <div class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/><path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18z"/></svg></div>
         <h3>Smart advice</h3>
-        <p>Suggests a safe duration based on heat, power source, and system load before you start.</p>
+        <p>Suggests a safe duration from current heat &amp; power.</p>
+        <svg class="wm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z"/></svg>
       </div>
+
     </div>
   </div>
 </section>
 
-<section>
+<!-- ── Use cases (list) ─────────────────────────────── -->
+<section id="usecases">
   <div class="wrap">
-    <h2>Set up in 3 steps</h2>
-    <p class="sub">Takes about a minute. The Terminal step is needed only once.</p>
-    <div class="steps">
+    <p class="eyebrow">Use cases</p>
+    <h2>Close the lid. Keep going.</h2>
+    <p class="sub">For the long-running work you don't want to babysit.</p>
+    <div class="uclist">
 
+      <div class="ucrow">
+        <div class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="9" cy="13" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.4" fill="currentColor" stroke="none"/><path d="M12 7V3"/></svg></div>
+        <div class="uc-body">
+          <h3>Running an AI agent</h3>
+          <p>A coding agent or local LLM keeps working while you close the lid and step away.</p>
+        </div>
+        <span class="uc-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg><span>Won't pause</span></span>
+      </div>
+
+      <div class="ucrow">
+        <div class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg></div>
+        <div class="uc-body">
+          <h3>Building an app or APK</h3>
+          <p>Long Xcode or Android builds finish even after you shut the lid and carry your Mac away.</p>
+        </div>
+        <span class="uc-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg><span>Won't pause</span></span>
+      </div>
+
+      <div class="ucrow">
+        <div class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></div>
+        <div class="uc-body">
+          <h3>On the move, on AC</h3>
+          <p>Heading out with your charger? The job stays alive the whole way there.</p>
+        </div>
+        <span class="uc-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg><span>Won't pause</span></span>
+      </div>
+
+      <div class="ucrow">
+        <div class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg></div>
+        <div class="uc-body">
+          <h3>Downloads &amp; exports</h3>
+          <p>Big transfers, renders, and video exports complete unattended, lid-closed.</p>
+        </div>
+        <span class="uc-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg><span>Won't pause</span></span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Setup ────────────────────────────────────────── -->
+<section id="setup">
+  <div class="wrap">
+    <p class="eyebrow">Get started</p>
+    <h2>Set up in three steps</h2>
+    <p class="sub">About a minute. The Terminal step is needed only once.</p>
+    <div class="steps">
       <div class="step">
         <div class="num">1</div>
         <div>
           <h3>Download &amp; install</h3>
-          <p>Open the downloaded <code>insomniac.dmg</code>, then drag the <strong>Insomniac</strong> icon onto the <strong>Applications</strong> folder. You can eject the disk image afterward.</p>
+          <p>Open the downloaded <code>insomniac.dmg</code>, then drag <strong>Insomniac</strong> onto the <strong>Applications</strong> folder. You can eject the disk image afterward.</p>
         </div>
       </div>
-
       <div class="step">
         <div class="num">2</div>
         <div>
           <h3>Allow it to open (one time)</h3>
-          <p>Because this is a free test build (not yet signed through Apple's paid program), macOS blocks it at first. To allow it, open <strong>Terminal</strong> (press <code>⌘ Space</code>, type “Terminal”, hit Return) and paste this command, then press Return:</p>
+          <p>This is a free test build (not yet through Apple's paid notarization), so macOS blocks it at first. Open <strong>Terminal</strong> (<code>⌘ Space</code> → “Terminal” → Return), paste this, and press Return:</p>
           <div class="cmd">
             <code id="cmdText">xattr -dr com.apple.quarantine /Applications/insomniac.app</code>
             <button class="copy" id="copyBtn">Copy</button>
           </div>
-          <p class="small" style="margin-top:10px;">Now open <strong>Insomniac</strong> from your Applications folder. It’ll launch normally from then on.</p>
+          <p style="margin-top:10px; font-size:13.5px;">Then open <strong>Insomniac</strong> from Applications — it launches normally from then on.</p>
         </div>
       </div>
-
       <div class="step">
         <div class="num">3</div>
         <div>
           <h3>Find it &amp; use it</h3>
-          <p>Insomniac has no Dock icon — it lives in the <strong>menu bar</strong> at the <strong>top-right of your screen</strong>. Look for the 🌙 moon icon (a welcome guide will point right at it on first launch). Click it, flip <em>Stay Awake</em> on, and when prompted, enter your Mac password — that’s the normal macOS approval.</p>
+          <p>Insomniac has no Dock icon — it lives in the <strong>menu bar</strong> at the <strong>top-right of your screen</strong>. Look for the 🌙 moon (a welcome guide points right at it on first launch). Click it, flip <em>Stay Awake</em> on, and enter your Mac password when asked.</p>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
+<!-- ── Changelog ────────────────────────────────────── -->
 <section>
   <div class="wrap">
-    <div class="note">
-      <p><strong>Is the Terminal step safe?</strong> Yes. That command just removes the “downloaded from the internet” quarantine flag macOS adds to any file from a browser or AirDrop. It’s the standard way to run apps that haven’t gone through Apple’s $99/yr notarization yet. Insomniac collects no data and has no network tracking.</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>What’s new</h2>
+    <p class="eyebrow">Changelog</p>
+    <h2>What's new</h2>
     <p class="sub">Version 1.0 — first test release</p>
     <div class="note">
-      <p>
-        🌙 First public test build. Includes lid-closed stay-awake, the auto-off timer,
-        automatic thermal &amp; battery safety cutoffs, and a first-launch welcome guide
-        that points you to the menu-bar icon.
-      </p>
+      <p>🌙 First public test build. Lid-closed stay-awake, the auto-off timer, automatic thermal &amp; battery safety cutoffs, smart duration advice, and a first-launch welcome guide that points you to the menu-bar icon.</p>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    Insomniac · a little menu-bar utility · shared for testing 🌙
+    Insomniac · a little menu-bar utility, shared for testing 🌙<br />
+    <a href="https://github.com/Saif-09/insomniac">View on GitHub</a>
   </div>
 </footer>
 
 <script>
-  // ── Your download link ───────────────────────────────────────────────
-  // Paste the link to your hosted .dmg here (Google Drive, Dropbox, GitHub
-  // Release, etc.). For Google Drive, set sharing to "Anyone with the link".
-  // Always points at the .dmg attached to the latest GitHub Release —
-  // re-running package.sh + a new release updates it with no page changes.
   const DOWNLOAD_URL = "https://github.com/Saif-09/insomniac/releases/latest/download/insomniac.dmg";
-
-  const btn = document.getElementById("downloadBtn");
-  if (DOWNLOAD_URL && DOWNLOAD_URL !== "REPLACE_WITH_YOUR_LINK") {
-    btn.href = DOWNLOAD_URL;
-  } else {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      alert("Set DOWNLOAD_URL in this page's script to your .dmg link.");
-    });
-  }
-
-  // ── Copy-to-clipboard for the Terminal command ───────────────────────
+  ["downloadBtn", "navDl"].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (DOWNLOAD_URL && DOWNLOAD_URL !== "REPLACE_WITH_YOUR_LINK") el.href = DOWNLOAD_URL;
+    else el.addEventListener("click", function (e) { e.preventDefault(); alert("Set DOWNLOAD_URL to your .dmg link."); });
+  });
   const copyBtn = document.getElementById("copyBtn");
   copyBtn.addEventListener("click", function () {
-    const text = document.getElementById("cmdText").textContent;
-    navigator.clipboard.writeText(text).then(function () {
-      copyBtn.textContent = "Copied!";
-      copyBtn.classList.add("done");
-      setTimeout(function () {
-        copyBtn.textContent = "Copy";
-        copyBtn.classList.remove("done");
-      }, 1800);
+    navigator.clipboard.writeText(document.getElementById("cmdText").textContent).then(function () {
+      copyBtn.textContent = "Copied!"; copyBtn.classList.add("done");
+      setTimeout(function () { copyBtn.textContent = "Copy"; copyBtn.classList.remove("done"); }, 1800);
     });
   });
 </script>

@@ -23,6 +23,7 @@ final class AppController {
     let thermal = ThermalMonitor()
     let powerSource = PowerSourceMonitor()
     let load = LoadMonitor()
+    let lid = LidMonitor()
     let weather = WeatherService()
     let helperInstaller = HelperInstaller()
     private let geo = IPGeolocationService()
@@ -53,6 +54,10 @@ final class AppController {
         powerSource.onChange = { [weak self] in
             self?.checkBatteryCutoff()
         }
+        // Turn the display off when the lid closes during an active session.
+        lid.onLidClosed = { [weak self] in
+            self?.handleLidClosed()
+        }
 
         Task { await notifier.requestAuthorizationIfNeeded() }
         Task { await refreshWeatherIfEnabled() }
@@ -68,7 +73,9 @@ final class AppController {
             thermalState: thermal.state,
             isOnAC: powerSource.isOnAC,
             isUnderHeavyLoad: load.isUnderHeavyLoad,
-            ambientCelsius: prefs.weatherEnabled ? weather.currentCelsius : nil
+            ambientCelsius: prefs.weatherEnabled ? weather.currentCelsius : nil,
+            batteryFraction: powerSource.batteryFraction,
+            batteryCutoffPercent: prefs.batteryCutoffEnabled ? prefs.batteryCutoffPercent : nil
         ))
     }
 
@@ -85,6 +92,19 @@ final class AppController {
     /// What `enable` will actually use: an explicit choice, else the preselect.
     var effectiveDuration: AutoOffDuration {
         chosenDuration ?? preselectedDuration
+    }
+
+    /// A reason a session must not be started right now, or `nil` if it's fine.
+    /// Currently: the battery is already at/below the auto-stop threshold, so
+    /// starting would only prompt for the password, succeed, then trip the
+    /// battery cutoff and prompt again to stop — a confusing double prompt that
+    /// reads as a loop. We refuse up front with a clear reason instead.
+    var startBlockedReason: String? {
+        guard prefs.batteryCutoffEnabled, !powerSource.isOnAC,
+              let fraction = powerSource.batteryFraction else { return nil }
+        let percent = Int((fraction * 100).rounded())
+        guard percent <= prefs.batteryCutoffPercent else { return nil }
+        return "Battery is at \(percent)%, at or below your \(prefs.batteryCutoffPercent)% auto-stop. Plug in to start a session, or lower the threshold in Settings."
     }
 
     var remaining: TimeInterval {
@@ -141,6 +161,14 @@ final class AppController {
 
     func enable(duration: AutoOffDuration) async {
         guard !isActive, !isBusy else { return }
+
+        // Don't start a session the battery cutoff would immediately stop — that
+        // path prompts for the helper password twice and looks like a loop.
+        if let blocker = startBlockedReason {
+            lastErrorMessage = blocker
+            return
+        }
+
         isBusy = true
         lastErrorMessage = nil
         defer { isBusy = false }
@@ -228,6 +256,16 @@ final class AppController {
         if state.rawValue >= prefs.thermalCutoff.rawValue {
             Task { await disable(reason: .thermalCutoff(state)) }
         }
+    }
+
+    // MARK: - Lid close → display off
+
+    /// When the lid closes during an active session, `disablesleep 1` keeps the
+    /// system awake but suppresses the normal display-off, so we trigger it
+    /// ourselves. No-op when no session is running or the user opted out.
+    private func handleLidClosed() {
+        guard isActive, prefs.turnOffScreenOnLidClose else { return }
+        DisplaySleep.now()
     }
 
     // MARK: - Live battery cutoff

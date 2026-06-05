@@ -20,6 +20,8 @@ struct SettingsSection: View {
             VStack(alignment: .leading, spacing: 10) {
                 cutoffPicker
                 batteryCutoffControls
+                Toggle("Turn screen off when lid closes", isOn: $prefs.turnOffScreenOnLidClose)
+                    .font(.caption)
                 Toggle("Use advisor's suggested duration", isOn: $prefs.respectAdvisorySuggestion)
                     .font(.caption)
                 weatherControls

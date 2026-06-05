@@ -32,6 +32,7 @@ final class Preferences {
         static let respectAdvisorySuggestion = "respectAdvisorySuggestion"
         static let batteryCutoffEnabled = "batteryCutoffEnabled"
         static let batteryCutoffPercent = "batteryCutoffPercent"
+        static let turnOffScreenOnLidClose = "turnOffScreenOnLidClose"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
     }
 
@@ -111,6 +112,22 @@ final class Preferences {
         set {
             withMutation(keyPath: \.batteryCutoffPercent) {
                 defaults.set(newValue, forKey: Key.batteryCutoffPercent)
+            }
+        }
+    }
+
+    /// Turn the internal display off when the lid is closed during an active
+    /// session (default on). `disablesleep 1` keeps the system awake but
+    /// suppresses the lid sensor's normal display-off, leaving the backlight on
+    /// behind a closed lid — this re-enables that behaviour without sleeping.
+    var turnOffScreenOnLidClose: Bool {
+        get {
+            access(keyPath: \.turnOffScreenOnLidClose)
+            return defaults.object(forKey: Key.turnOffScreenOnLidClose) as? Bool ?? true
+        }
+        set {
+            withMutation(keyPath: \.turnOffScreenOnLidClose) {
+                defaults.set(newValue, forKey: Key.turnOffScreenOnLidClose)
             }
         }
     }

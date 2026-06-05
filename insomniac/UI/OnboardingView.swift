@@ -86,7 +86,7 @@ struct OnboardingView: View {
             FeatureRow(
                 icon: "macbook.and.visionpro", tint: .accentColor,
                 title: "Lid-closed stay-awake",
-                subtitle: "Flip one switch and your Mac keeps running with the lid shut."
+                subtitle: "Flip one switch and your Mac keeps running with the lid shut — the screen turns off to save power."
             )
             FeatureRow(
                 icon: "timer", tint: .blue,

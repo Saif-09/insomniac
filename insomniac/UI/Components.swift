@@ -83,6 +83,63 @@ struct StatusDot: View {
     }
 }
 
+// MARK: - Settings building blocks
+
+/// A leading glyph for a settings row — a plain monochrome SF Symbol on a
+/// fixed-width column so every row's text aligns (macOS System Settings style).
+struct SettingIcon: View {
+    var systemImage: String
+    var body: some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 14))
+            .foregroundStyle(.secondary)
+            .frame(width: 20, alignment: .center)
+    }
+}
+
+/// A settings row: leading icon, title/subtitle, and arbitrary trailing content
+/// (a picker, switch, value, etc.). Always fills the row width so every row's
+/// trailing control right-aligns to the same edge.
+struct SettingRow<Trailing: View>: View {
+    var icon: String
+    var title: String
+    var subtitle: String?
+    @ViewBuilder var trailing: () -> Trailing
+
+    var body: some View {
+        HStack(spacing: 10) {
+            SettingIcon(systemImage: icon)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.callout)
+                if let subtitle {
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 8)
+            trailing()
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// A settings row with a trailing switch — built on `SettingRow` so its switch
+/// aligns with the pickers and buttons in sibling rows.
+struct SettingToggleRow: View {
+    var icon: String
+    var title: String
+    var subtitle: String?
+    @Binding var isOn: Bool
+
+    var body: some View {
+        SettingRow(icon: icon, title: title, subtitle: subtitle) {
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
+        }
+    }
+}
+
 // MARK: - Pill chip
 
 struct Chip: View {

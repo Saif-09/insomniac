@@ -123,31 +123,110 @@ struct MenuContent: View {
 
             Divider().opacity(0.4)
 
-            HStack {
-                Label("Auto-off", systemImage: "timer")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Picker("Auto-off", selection: autoOffSelection) {
-                    ForEach(AutoOffDuration.allCases) { duration in
-                        Text(duration.label).tag(duration)
+            VStack(spacing: 10) {
+                HStack {
+                    Label("Auto-off", systemImage: "timer")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Picker("Auto-off", selection: durationKind) {
+                        ForEach(DurationKind.allCases) { kind in
+                            Text(kind.label).tag(kind)
+                        }
                     }
+                    .labelsHidden()
+                    .frame(width: 140)
                 }
-                .labelsHidden()
-                .frame(width: 140)
+
+                if currentDuration.isCustom {
+                    customLengthSlider
+                }
             }
         }
         .card(tint: app.isActive ? accent : .primary, fill: app.isActive ? 0.10 : 0.05, stroke: app.isActive ? 0.22 : 0.09)
         .animation(.easeInOut(duration: 0.25), value: app.isActive)
+        .animation(.easeInOut(duration: 0.2), value: currentDuration.isCustom)
     }
 
-    private var autoOffSelection: Binding<AutoOffDuration> {
-        Binding(
-            get: { app.isActive ? (app.session?.duration ?? app.effectiveDuration) : app.effectiveDuration },
-            set: { newValue in
-                if app.isActive { app.reschedule(to: newValue) }
-                else { app.chosenDuration = newValue }
+    /// The custom-length control: a slider bounded to 10 minutes … 8 hours.
+    private var customLengthSlider: some View {
+        VStack(spacing: 5) {
+            HStack {
+                Text("Length")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(currentDuration.label)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(accent)
+                    .contentTransition(.numericText())
             }
+            HStack(spacing: 8) {
+                Text("10m").font(.caption2).foregroundStyle(.tertiary)
+                Slider(
+                    value: customMinutes,
+                    in: Double(AutoOffDuration.minSeconds / 60)...Double(AutoOffDuration.maxSeconds / 60),
+                    step: 5
+                )
+                .tint(accent)
+                Text("8h").font(.caption2).foregroundStyle(.tertiary)
+            }
+        }
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    /// The currently effective duration — the live session's, or the pending
+    /// selection when idle.
+    private var currentDuration: AutoOffDuration {
+        app.isActive ? (app.session?.duration ?? app.effectiveDuration) : app.effectiveDuration
+    }
+
+    /// Picker kinds: the four presets plus a "Custom…" entry. Kept separate from
+    /// `AutoOffDuration` so the custom row's tag is stable as the slider moves.
+    private enum DurationKind: String, CaseIterable, Identifiable {
+        case fifteenMinutes, oneHour, twoHours, maximum, custom
+        var id: String { rawValue }
+        var label: String {
+            switch self {
+            case .fifteenMinutes: return AutoOffDuration.fifteenMinutes.label
+            case .oneHour: return AutoOffDuration.oneHour.label
+            case .twoHours: return AutoOffDuration.twoHours.label
+            case .maximum: return AutoOffDuration.maximum.label
+            case .custom: return "Custom…"
+            }
+        }
+    }
+
+    private var durationKind: Binding<DurationKind> {
+        Binding(
+            get: {
+                switch currentDuration {
+                case .fifteenMinutes: return .fifteenMinutes
+                case .oneHour: return .oneHour
+                case .twoHours: return .twoHours
+                case .maximum: return .maximum
+                case .custom: return .custom
+                }
+            },
+            set: { kind in
+                switch kind {
+                case .fifteenMinutes: app.selectDuration(.fifteenMinutes)
+                case .oneHour: app.selectDuration(.oneHour)
+                case .twoHours: app.selectDuration(.twoHours)
+                case .maximum: app.selectDuration(.maximum)
+                case .custom: app.setCustomDuration(minutes: app.prefs.customAutoOffMinutes)
+                }
+            }
+        )
+    }
+
+    private var customMinutes: Binding<Double> {
+        Binding(
+            get: {
+                if case .custom(let s) = currentDuration { return Double(s / 60) }
+                return Double(app.prefs.customAutoOffMinutes)
+            },
+            set: { app.setCustomDuration(minutes: Int($0)) }
         )
     }
 

@@ -27,6 +27,7 @@ final class Preferences {
 
     private enum Key {
         static let defaultAutoOff = "defaultAutoOff"
+        static let customAutoOffMinutes = "customAutoOffMinutes"
         static let thermalCutoff = "thermalCutoffRawValue"
         static let weatherEnabled = "weatherEnabled"
         static let respectAdvisorySuggestion = "respectAdvisorySuggestion"
@@ -53,18 +54,36 @@ final class Preferences {
     }
 
     /// The auto-off duration pre-selected when nothing else dictates it.
+    /// Persisted as raw seconds, which is also the format the old `Int`-raw
+    /// enum used — so existing saved values migrate transparently.
     var defaultAutoOff: AutoOffDuration {
         get {
             access(keyPath: \.defaultAutoOff)
-            if let raw = defaults.object(forKey: Key.defaultAutoOff) as? Int,
-               let value = AutoOffDuration(rawValue: raw) {
-                return value
+            if let seconds = defaults.object(forKey: Key.defaultAutoOff) as? Int {
+                return AutoOffDuration(seconds: seconds)
             }
             return .oneHour
         }
         set {
             withMutation(keyPath: \.defaultAutoOff) {
-                defaults.set(newValue.rawValue, forKey: Key.defaultAutoOff)
+                defaults.set(Int(newValue.seconds), forKey: Key.defaultAutoOff)
+            }
+        }
+    }
+
+    /// The minutes last used for a custom auto-off length, remembered so the
+    /// custom slider reopens where the user left it. Clamped to the duration
+    /// bounds (10 minutes … 8 hours).
+    var customAutoOffMinutes: Int {
+        get {
+            access(keyPath: \.customAutoOffMinutes)
+            let stored = defaults.object(forKey: Key.customAutoOffMinutes) as? Int ?? 30
+            return min(max(stored, AutoOffDuration.minSeconds / 60), AutoOffDuration.maxSeconds / 60)
+        }
+        set {
+            withMutation(keyPath: \.customAutoOffMinutes) {
+                let clamped = min(max(newValue, AutoOffDuration.minSeconds / 60), AutoOffDuration.maxSeconds / 60)
+                defaults.set(clamped, forKey: Key.customAutoOffMinutes)
             }
         }
     }

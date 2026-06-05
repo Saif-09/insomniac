@@ -220,6 +220,23 @@ final class AppController {
         session = Session(startedAt: current.startedAt, duration: duration)
     }
 
+    /// Apply a chosen duration: reschedule a live session, or stage it as the
+    /// pending choice for the next one. Single entry point for the menu picker.
+    func selectDuration(_ duration: AutoOffDuration) {
+        if isActive { reschedule(to: duration) }
+        else { chosenDuration = duration }
+    }
+
+    /// Apply a custom auto-off length in minutes (clamped to the duration
+    /// bounds) and remember it for next time.
+    func setCustomDuration(minutes: Int) {
+        let lo = AutoOffDuration.minSeconds / 60
+        let hi = AutoOffDuration.maxSeconds / 60
+        let clamped = min(max(minutes, lo), hi)
+        prefs.customAutoOffMinutes = clamped
+        selectDuration(.custom(seconds: clamped * 60))
+    }
+
     // MARK: - Countdown (FR-6, FR-7)
 
     private func startCountdown() {

@@ -12,15 +12,58 @@ import Foundation
 /// The selectable auto-off durations. There is intentionally no true
 /// "Indefinite": the longest option is a hard maximum cap so the app can never
 /// leave the Mac permanently unable to sleep (decision: force a max cap).
-enum AutoOffDuration: Int, CaseIterable, Identifiable, Codable {
-    case fifteenMinutes = 900
-    case oneHour = 3600
-    case twoHours = 7200
+///
+/// Beyond the presets, the user can pick a `.custom` length, always clamped to
+/// `[minSeconds, maxSeconds]` so the safety ceiling still holds.
+enum AutoOffDuration: Identifiable, Codable, Equatable, Hashable {
+    case fifteenMinutes
+    case oneHour
+    case twoHours
     /// The hard safety ceiling that stands in for "Indefinite".
-    case maximum = 28800 // 8 hours
+    case maximum // 8 hours
+    /// A user-chosen length in seconds, clamped to `[minSeconds, maxSeconds]`.
+    case custom(seconds: Int)
 
-    var id: Int { rawValue }
-    var seconds: TimeInterval { TimeInterval(rawValue) }
+    /// Hard bounds on any duration: 10 minutes to 8 hours.
+    static let minSeconds = 600
+    static let maxSeconds = 28800
+
+    /// The fixed presets, in order, for the picker.
+    static let presets: [AutoOffDuration] = [.fifteenMinutes, .oneHour, .twoHours, .maximum]
+
+    /// Build from a raw seconds value, snapping to a preset when it matches one
+    /// exactly and otherwise producing a clamped `.custom`. Also the migration
+    /// path for the old `Int`-raw persistence (which stored seconds directly).
+    init(seconds: Int) {
+        switch seconds {
+        case 900: self = .fifteenMinutes
+        case 3600: self = .oneHour
+        case 7200: self = .twoHours
+        case 28800: self = .maximum
+        default: self = .custom(seconds: min(max(seconds, Self.minSeconds), Self.maxSeconds))
+        }
+    }
+
+    var id: String {
+        if case .custom(let s) = self { return "custom-\(s)" }
+        return "preset-\(Int(seconds))"
+    }
+
+    var seconds: TimeInterval {
+        switch self {
+        case .fifteenMinutes: return 900
+        case .oneHour: return 3600
+        case .twoHours: return 7200
+        case .maximum: return 28800
+        case .custom(let s): return TimeInterval(min(max(s, Self.minSeconds), Self.maxSeconds))
+        }
+    }
+
+    /// Whether this is a user-chosen custom length (vs. a fixed preset).
+    var isCustom: Bool {
+        if case .custom = self { return true }
+        return false
+    }
 
     var label: String {
         switch self {
@@ -28,6 +71,7 @@ enum AutoOffDuration: Int, CaseIterable, Identifiable, Codable {
         case .oneHour: return "1 hour"
         case .twoHours: return "2 hours"
         case .maximum: return "8 hours (max)"
+        case .custom: return Self.longText(forMinutes: Int(seconds) / 60)
         }
     }
 
@@ -37,7 +81,24 @@ enum AutoOffDuration: Int, CaseIterable, Identifiable, Codable {
         case .oneHour: return "1h"
         case .twoHours: return "2h"
         case .maximum: return "8h"
+        case .custom: return Self.shortText(forMinutes: Int(seconds) / 60)
         }
+    }
+
+    /// "45 minutes", "1 hour", "3h 30m" — for the long picker/label form.
+    static func longText(forMinutes minutes: Int) -> String {
+        let h = minutes / 60, m = minutes % 60
+        if h == 0 { return "\(m) minutes" }
+        if m == 0 { return h == 1 ? "1 hour" : "\(h) hours" }
+        return "\(h)h \(m)m"
+    }
+
+    /// "45m", "1h", "3h30m" — for compact chips/short labels.
+    static func shortText(forMinutes minutes: Int) -> String {
+        let h = minutes / 60, m = minutes % 60
+        if h == 0 { return "\(m)m" }
+        if m == 0 { return "\(h)h" }
+        return "\(h)h\(m)m"
     }
 }
 

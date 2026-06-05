@@ -6,8 +6,57 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CAFE0000000000000000B001 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F002 /* main.swift */; };
+		CAFE0000000000000000B002 /* HelperTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F003 /* HelperTool.swift */; };
+		CAFE0000000000000000B003 /* HelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F006 /* HelperProtocol.swift */; };
+		CAFE0000000000000000B004 /* dev.saif.insomniac.helper in Copy Helper Executable */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F001 /* dev.saif.insomniac.helper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CAFE0000000000000000B005 /* dev.saif.insomniac.helper.plist in Copy LaunchDaemon */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F005 /* dev.saif.insomniac.helper.plist */; };
+		CAFE0000000000000000B006 /* HelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAFE0000000000000000F006 /* HelperProtocol.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CAFE0000000000000000X001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0782ABE62FD2E0310093E092 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CAFE0000000000000000T001;
+			remoteInfo = dev.saif.insomniac.helper;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CAFE0000000000000000P003 /* Copy Helper Executable */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				CAFE0000000000000000B004 /* dev.saif.insomniac.helper in Copy Helper Executable */,
+			);
+			name = "Copy Helper Executable";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAFE0000000000000000P004 /* Copy LaunchDaemon */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LaunchDaemons;
+			dstSubfolderSpec = 1;
+			files = (
+				CAFE0000000000000000B005 /* dev.saif.insomniac.helper.plist in Copy LaunchDaemon */,
+			);
+			name = "Copy LaunchDaemon";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0782ABEE2FD2E0310093E092 /* insomniac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = insomniac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAFE0000000000000000F001 /* dev.saif.insomniac.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dev.saif.insomniac.helper; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAFE0000000000000000F002 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		CAFE0000000000000000F003 /* HelperTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperTool.swift; sourceTree = "<group>"; };
+		CAFE0000000000000000F005 /* dev.saif.insomniac.helper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = dev.saif.insomniac.helper.plist; sourceTree = "<group>"; };
+		CAFE0000000000000000F006 /* HelperProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +75,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CAFE0000000000000000P002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +89,8 @@
 			isa = PBXGroup;
 			children = (
 				0782ABF02FD2E0310093E092 /* insomniac */,
+				CAFE0000000000000000G002 /* Shared */,
+				CAFE0000000000000000G001 /* Helper */,
 				0782ABEF2FD2E0310093E092 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +99,27 @@
 			isa = PBXGroup;
 			children = (
 				0782ABEE2FD2E0310093E092 /* insomniac.app */,
+				CAFE0000000000000000F001 /* dev.saif.insomniac.helper */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CAFE0000000000000000G001 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				CAFE0000000000000000F002 /* main.swift */,
+				CAFE0000000000000000F003 /* HelperTool.swift */,
+				CAFE0000000000000000F005 /* dev.saif.insomniac.helper.plist */,
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
+		CAFE0000000000000000G002 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CAFE0000000000000000F006 /* HelperProtocol.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +132,13 @@
 				0782ABEA2FD2E0310093E092 /* Sources */,
 				0782ABEB2FD2E0310093E092 /* Frameworks */,
 				0782ABEC2FD2E0310093E092 /* Resources */,
+				CAFE0000000000000000P003 /* Copy Helper Executable */,
+				CAFE0000000000000000P004 /* Copy LaunchDaemon */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				CAFE0000000000000000D001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				0782ABF02FD2E0310093E092 /* insomniac */,
@@ -69,6 +149,24 @@
 			productName = insomniac;
 			productReference = 0782ABEE2FD2E0310093E092 /* insomniac.app */;
 			productType = "com.apple.product-type.application";
+		};
+		CAFE0000000000000000T001 /* dev.saif.insomniac.helper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAFE0000000000000000C000 /* Build configuration list for PBXNativeTarget "dev.saif.insomniac.helper" */;
+			buildPhases = (
+				CAFE0000000000000000P001 /* Sources */,
+				CAFE0000000000000000P002 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dev.saif.insomniac.helper;
+			packageProductDependencies = (
+			);
+			productName = dev.saif.insomniac.helper;
+			productReference = CAFE0000000000000000F001 /* dev.saif.insomniac.helper */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +179,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					0782ABED2FD2E0310093E092 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					CAFE0000000000000000T001 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -100,6 +201,7 @@
 			projectRoot = "";
 			targets = (
 				0782ABED2FD2E0310093E092 /* insomniac */,
+				CAFE0000000000000000T001 /* dev.saif.insomniac.helper */,
 			);
 		};
 /* End PBXProject section */
@@ -119,10 +221,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CAFE0000000000000000B006 /* HelperProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CAFE0000000000000000P001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CAFE0000000000000000B001 /* main.swift in Sources */,
+				CAFE0000000000000000B002 /* HelperTool.swift in Sources */,
+				CAFE0000000000000000B003 /* HelperProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CAFE0000000000000000D001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CAFE0000000000000000T001 /* dev.saif.insomniac.helper */;
+			targetProxy = CAFE0000000000000000X001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0782ABF72FD2E0320093E092 /* Debug */ = {
@@ -179,7 +300,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -237,7 +358,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -254,11 +375,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DTQF9KJP6S;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Insomniac;
+				INFOPLIST_KEY_CFBundleName = Insomniac;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -286,11 +410,14 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DTQF9KJP6S;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Insomniac;
+				INFOPLIST_KEY_CFBundleName = Insomniac;
+				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -305,6 +432,44 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		CAFE0000000000000000C001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				DEVELOPMENT_TEAM = DTQF9KJP6S;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "insomniac helper";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saif.insomniac.helper;
+				PRODUCT_MODULE_NAME = insomniac_helper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CAFE0000000000000000C002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CREATE_INFOPLIST_SECTION_IN_BINARY = YES;
+				DEVELOPMENT_TEAM = DTQF9KJP6S;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "insomniac helper";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.saif.insomniac.helper;
+				PRODUCT_MODULE_NAME = insomniac_helper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -326,6 +491,15 @@
 			buildConfigurations = (
 				0782ABFA2FD2E0320093E092 /* Debug */,
 				0782ABFB2FD2E0320093E092 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAFE0000000000000000C000 /* Build configuration list for PBXNativeTarget "dev.saif.insomniac.helper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAFE0000000000000000C001 /* Debug */,
+				CAFE0000000000000000C002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

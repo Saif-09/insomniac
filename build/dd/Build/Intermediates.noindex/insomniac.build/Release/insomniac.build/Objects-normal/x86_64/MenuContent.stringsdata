@@ -1,0 +1,80 @@
+{
+  "source": "/Users/saifsiddiqui/Developer/Workspace/insomniac/insomniac/UI/MenuContent.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "insomniac",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 61
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sleep is still disabled from a previous run.",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 74
+        }
+      },
+      {
+        "comment": "",
+        "key": "Restore normal sleep",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 77
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ignore",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 80
+        }
+      },
+      {
+        "comment": "",
+        "key": "Stay Awake",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Auto-off",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 127
+        }
+      },
+      {
+        "comment": "",
+        "key": "Auto-off",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "suggests %@",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 175
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quit",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 214
+        }
+      }
+    ]
+  },
+  "version": 1
+}

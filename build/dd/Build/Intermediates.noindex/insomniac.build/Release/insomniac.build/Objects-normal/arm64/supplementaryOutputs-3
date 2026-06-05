@@ -1,0 +1,12 @@
+{
+  "/Users/saifsiddiqui/Developer/Workspace/insomniac/Shared/HelperProtocol.swift" : {
+    "abi-baseline-json" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac.abi.json",
+    "const-values" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac-primary.swiftconstvalues",
+    "dependencies" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac-primary.d",
+    "diagnostics" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac-primary.dia",
+    "objc-header" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac-Swift.h",
+    "swiftdoc" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac.swiftdoc",
+    "swiftmodule" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac.swiftmodule",
+    "swiftsourceinfo" : "/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Intermediates.noindex/insomniac.build/Release/insomniac.build/Objects-normal/arm64/insomniac.swiftsourceinfo"
+  }
+}

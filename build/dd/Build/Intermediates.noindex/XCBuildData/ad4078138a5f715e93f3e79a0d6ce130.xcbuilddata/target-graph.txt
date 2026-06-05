@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'insomniac' in project 'insomniac'
+➜ Explicit dependency on target 'dev.saif.insomniac.helper' in project 'insomniac'
+Target 'dev.saif.insomniac.helper' in project 'insomniac' (no dependencies)

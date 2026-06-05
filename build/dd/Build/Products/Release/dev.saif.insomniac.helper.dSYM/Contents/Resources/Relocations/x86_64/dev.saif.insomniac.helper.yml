@@ -1,0 +1,19 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     '/Users/saifsiddiqui/Developer/Workspace/insomniac/build/dd/Build/Products/Release/dev.saif.insomniac.helper'
+relocations:
+  - { offset: 0x78FC6, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100000EA0, symSize: 0x101 }
+  - { offset: 0x78FEA, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper8delegateAA22HelperListenerDelegateCvp', symObjAddr: 0x1100, symBinAddr: 0x100004880, symSize: 0x0 }
+  - { offset: 0x79027, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper8listenerSo13NSXPCListenerCvp', symObjAddr: 0x1108, symBinAddr: 0x100004888, symSize: 0x0 }
+  - { offset: 0x79035, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100000EA0, symSize: 0x101 }
+  - { offset: 0x79212, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper22HelperListenerDelegateCMa', symObjAddr: 0x70, symBinAddr: 0x100001020, symSize: 0x20 }
+  - { offset: 0x792DD, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper10HelperToolCMa', symObjAddr: 0x1D0, symBinAddr: 0x100001180, symSize: 0x20 }
+  - { offset: 0x79328, size: 0x8, addend: 0x0, symName: ___swift_instantiateConcreteTypeFromMangledNameV2, symObjAddr: 0x860, symBinAddr: 0x100001810, symSize: 0x40 }
+  - { offset: 0x7933C, size: 0x8, addend: 0x0, symName: '_$s10Foundation4DataV15_RepresentationOWOe', symObjAddr: 0x8A0, symBinAddr: 0x100001850, symSize: 0x40 }
+  - { offset: 0x79350, size: 0x8, addend: 0x0, symName: '_$sS2SSysWl', symObjAddr: 0x8E0, symBinAddr: 0x100001890, symSize: 0x30 }
+  - { offset: 0x79518, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper22HelperListenerDelegateC8listener_25shouldAcceptNewConnectionSbSo13NSXPCListenerC_So15NSXPCConnectionCtFTo', symObjAddr: 0x0, symBinAddr: 0x100000FB0, symSize: 0x70 }
+  - { offset: 0x79557, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper10HelperToolC16setSleepDisabled_5replyySb_ySb_SSSgtctFTo', symObjAddr: 0x90, symBinAddr: 0x100001040, symSize: 0x70 }
+  - { offset: 0x795AB, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper10HelperToolC10getVersion5replyyySSc_tFTo', symObjAddr: 0x100, symBinAddr: 0x1000010B0, symSize: 0x50 }
+  - { offset: 0x79615, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper22HelperListenerDelegateC8listener_25shouldAcceptNewConnectionSbSo13NSXPCListenerC_So15NSXPCConnectionCtFTf4dnd_n', symObjAddr: 0x1F0, symBinAddr: 0x1000011A0, symSize: 0xF0 }
+  - { offset: 0x796E4, size: 0x8, addend: 0x0, symName: '_$s16insomniac_helper10HelperToolC16setSleepDisabled_5replyySb_ySb_SSSgtctF59$s10ObjectiveC8ObjCBoolVSo8NSStringCSgIeyByy_SbSSSgIegyg_TR0J1C0lM0VSo0O0CSgIeyByy_Tf1ncn_nTf4ndg_n', symObjAddr: 0x2E0, symBinAddr: 0x100001290, symSize: 0x580 }
+...

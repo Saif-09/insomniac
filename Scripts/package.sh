@@ -48,6 +48,20 @@ ln -s /Applications "$STAGE/Applications"
 echo "▶ Rendering install-window background…"
 swift "$PWD/Scripts/make_dmg_background.swift" "$STAGE/.background/bg.png" >/dev/null
 
+# A copyable command file, so users can grab the command from the DMG itself
+# (the website also has a Copy button).
+cat > "$STAGE/Copy command.txt" <<'TXT'
+Insomniac — one-time setup
+
+Copy the line below, paste it into Terminal, and press Return.
+Then open Insomniac normally.
+
+xattr -dr com.apple.quarantine /Applications/insomniac.app
+
+(It's code-signed and safe — this only clears Apple's "unverified"
+block that applies to apps not yet notarized through Apple.)
+TXT
+
 # --- Build a read-write DMG, lay out the install window, then compress -------
 echo "▶ Building styled DMG…"
 # Detach any stale mounts from earlier runs, or Finder targets the wrong disk.
@@ -69,8 +83,9 @@ tell application "Finder"
     set icon size of vo to 100
     set text size of vo to 12
     set background picture of vo to file ".background:bg.png"
-    set position of item "$APP_NAME" of container window to {205, 185}
-    set position of item "Applications" of container window to {495, 185}
+    set position of item "$APP_NAME" of container window to {175, 155}
+    set position of item "Applications" of container window to {415, 155}
+    set position of item "Copy command.txt" of container window to {600, 155}
     update without registering applications
     delay 1
     close

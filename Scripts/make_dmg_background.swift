@@ -28,10 +28,11 @@ ctx.drawLinearGradient(grad, start: .zero, end: CGPoint(x: 0, y: H), options: []
 // Text helper. `yTop` is distance from the TOP of the canvas.
 func text(_ s: String, size: CGFloat, weight: NSFont.Weight = .regular,
           color: NSColor, yTop: CGFloat, centerX: CGFloat? = nil, x: CGFloat = 0,
-          mono: Bool = false) {
+          mono: Bool = false, kern: CGFloat = 0) {
     let font = mono ? (NSFont(name: "Menlo", size: size) ?? .monospacedSystemFont(ofSize: size, weight: .regular))
                     : NSFont.systemFont(ofSize: size, weight: weight)
-    let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+    var attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+    if kern != 0 { attrs[.kern] = kern }
     let str = NSAttributedString(string: s, attributes: attrs)
     let sz = str.size()
     let drawX = centerX != nil ? centerX! - sz.width / 2 : x
@@ -42,45 +43,70 @@ func roundRect(_ r: CGRect, radius: CGFloat) -> CGPath {
     CGPath(roundedRect: r, cornerWidth: radius, cornerHeight: radius, transform: nil)
 }
 
+// Amber caution triangle with a white "!" — drawn from a top-down center y.
+func caution(cxCenter: CGFloat, cyTop: CGFloat, size sz: CGFloat) {
+    let cy = H - cyTop, r = sz / 2
+    ctx.setFillColor(NSColor(srgbRed: 0.965, green: 0.776, blue: 0.141, alpha: 1).cgColor)
+    ctx.beginPath()
+    ctx.move(to: CGPoint(x: cxCenter, y: cy + r))
+    ctx.addLine(to: CGPoint(x: cxCenter + r, y: cy - r * 0.82))
+    ctx.addLine(to: CGPoint(x: cxCenter - r, y: cy - r * 0.82))
+    ctx.closePath(); ctx.fillPath()
+    ctx.setStrokeColor(NSColor.white.cgColor); ctx.setLineWidth(sz * 0.11); ctx.setLineCap(.round)
+    ctx.move(to: CGPoint(x: cxCenter, y: cy + r * 0.28))
+    ctx.addLine(to: CGPoint(x: cxCenter, y: cy - r * 0.12)); ctx.strokePath()
+    ctx.setFillColor(NSColor.white.cgColor)
+    ctx.fillEllipse(in: CGRect(x: cxCenter - sz * 0.055, y: cy - r * 0.42, width: sz * 0.11, height: sz * 0.11))
+}
+
 // ── Header ──────────────────────────────────────────────
 text("Install Insomniac", size: 27, weight: .bold, color: ink, yTop: 34, centerX: W/2)
 text("Drag the app onto the Applications folder", size: 13.5, color: muted, yTop: 70, centerX: W/2)
 
-// ── Drag arrow (between Finder's app icon @205 and Applications @495) ──
-// Icon centers are y-down 185 → y-up 285. Draw the arrow at that height.
-let ay: CGFloat = H - 185
+// ── Drag arrow (between Finder's app icon @175 and Applications @415) ──
+// Three icons sit at y-down 155: app(175) → Applications(415), plus the
+// "Copy command" text file at 600. Draw the arrow over the drag pair.
+let ay: CGFloat = H - 155
 ctx.setStrokeColor(accent.cgColor)
 ctx.setLineWidth(4); ctx.setLineCap(.round); ctx.setLineJoin(.round)
-ctx.move(to: CGPoint(x: 298, y: ay)); ctx.addLine(to: CGPoint(x: 398, y: ay)); ctx.strokePath()
-ctx.move(to: CGPoint(x: 384, y: ay + 13))
-ctx.addLine(to: CGPoint(x: 402, y: ay))
-ctx.addLine(to: CGPoint(x: 384, y: ay - 13)); ctx.strokePath()
+ctx.move(to: CGPoint(x: 250, y: ay)); ctx.addLine(to: CGPoint(x: 340, y: ay)); ctx.strokePath()
+ctx.move(to: CGPoint(x: 326, y: ay + 13))
+ctx.addLine(to: CGPoint(x: 344, y: ay))
+ctx.addLine(to: CGPoint(x: 326, y: ay - 13)); ctx.strokePath()
 
-// ── One-time setup card ─────────────────────────────────
-let card = CGRect(x: 44, y: 40, width: W - 88, height: 168) // y-up 40..208
-ctx.setShadow(offset: CGSize(width: 0, height: -4), blur: 16,
-              color: NSColor.black.withAlphaComponent(0.10).cgColor)
-ctx.setFillColor(NSColor.white.cgColor)
+// Small caption above the "Copy command" file (icon center @600).
+text("need to copy it?", size: 11, color: faint, yTop: 92, centerX: 600)
+
+// ── Important one-time-setup notice (amber, attention-grabbing) ──────────
+let card = CGRect(x: 44, y: 32, width: W - 88, height: 190) // y-up 32..222
+ctx.setShadow(offset: CGSize(width: 0, height: -4), blur: 18,
+              color: NSColor(srgbRed: 0.80, green: 0.58, blue: 0.0, alpha: 0.20).cgColor)
+ctx.setFillColor(NSColor(srgbRed: 1.0, green: 0.973, blue: 0.910, alpha: 1).cgColor)
 ctx.addPath(roundRect(card, radius: 16)); ctx.fillPath()
 ctx.setShadow(offset: .zero, blur: 0, color: nil)
-ctx.setStrokeColor(NSColor(srgbRed: 0.886, green: 0.898, blue: 0.918, alpha: 1).cgColor)
-ctx.setLineWidth(1); ctx.addPath(roundRect(card, radius: 16)); ctx.strokePath()
+ctx.setStrokeColor(NSColor(srgbRed: 0.913, green: 0.706, blue: 0.110, alpha: 1).cgColor)
+ctx.setLineWidth(1.5); ctx.addPath(roundRect(card, radius: 16)); ctx.strokePath()
 
-// Card content (y-down coordinates).
-text("One-time setup — do this BEFORE you open the app", size: 13.5, weight: .semibold,
-     color: ink, yTop: 278, x: 68)
+// "REQUIRED" badge: caution triangle + tracked uppercase amber label.
+let amberDark = NSColor(srgbRed: 0.494, green: 0.369, blue: 0.012, alpha: 1)
+caution(cxCenter: 80, cyTop: 271, size: 21)
+text("REQUIRED · ONE-TIME SETUP", size: 11.5, weight: .heavy, color: amberDark,
+     yTop: 264, x: 98, kern: 0.7)
+
+text("Open “Copy command” to copy it — or type this in Terminal:", size: 14, weight: .semibold,
+     color: ink, yTop: 290, x: 68)
 
 // Command pill (dark).
-let pill = CGRect(x: 68, y: H - 350, width: W - 136, height: 40) // y-down 310..350
+let pill = CGRect(x: 68, y: H - 362, width: W - 136, height: 40) // y-down 322..362
 ctx.setFillColor(NSColor(srgbRed: 0.118, green: 0.122, blue: 0.137, alpha: 1).cgColor)
 ctx.addPath(roundRect(pill, radius: 9)); ctx.fillPath()
 text("xattr -dr com.apple.quarantine /Applications/insomniac.app", size: 12.5,
-     color: NSColor(srgbRed: 0.902, green: 0.910, blue: 0.937, alpha: 1), yTop: 322, x: 84, mono: true)
+     color: NSColor(srgbRed: 0.902, green: 0.910, blue: 0.937, alpha: 1), yTop: 334, x: 84, mono: true)
 
-text("Open Terminal (⌘Space → “Terminal”), paste the line, press Return — then open Insomniac.",
-     size: 11.5, color: muted, yTop: 366, x: 68)
+text("Open Terminal (⌘Space → “Terminal”), paste, press Return — then open Insomniac.",
+     size: 11.5, color: muted, yTop: 376, x: 68)
 text("It's code-signed and safe — this only clears Apple's “unverified” block for un-notarized apps.",
-     size: 11, color: faint, yTop: 386, x: 68)
+     size: 10.5, color: faint, yTop: 395, x: 68)
 
 image.unlockFocus()
 

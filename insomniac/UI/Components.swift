@@ -140,6 +140,30 @@ struct SettingToggleRow: View {
     }
 }
 
+// MARK: - Caveat banner
+
+/// A soft warning banner — an amber (or tinted) card with a leading glyph and a
+/// short message. Used for honest caveats like the Apple-Silicon closed-lid note.
+struct CaveatCard: View {
+    var text: String
+    var systemImage: String = "exclamationmark.triangle.fill"
+    var tint: Color = .yellow
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: systemImage)
+                .font(.caption)
+                .foregroundStyle(tint)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .card(tint: tint, fill: 0.14, stroke: 0.28)
+    }
+}
+
 // MARK: - Pill chip
 
 struct Chip: View {

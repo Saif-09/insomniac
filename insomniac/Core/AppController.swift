@@ -24,11 +24,32 @@ final class AppController {
     let powerSource = PowerSourceMonitor()
     let load = LoadMonitor()
     let lid = LidMonitor()
+    let display = DisplayMonitor()
     let weather = WeatherService()
     let helperInstaller = HelperInstaller()
     private let geo = IPGeolocationService()
     private let notifier = NotificationManager()
     private let power: PowerControlling
+
+    /// In-process power assertion held for the duration of a session. It blocks
+    /// idle *system* sleep (the lid-open case) reliably and with no privileges —
+    /// the guarantee the raw `disablesleep` flag is flaky about on Apple Silicon.
+    /// Released automatically if the app quits or crashes. See PowerAssertion.
+    private let keepAwakeAssertion = PowerAssertion()
+
+    /// Live, read-only view of the real system power state (SleepDisabled flag,
+    /// sleep timers, and what's currently keeping the Mac awake) for the System
+    /// control-center tab.
+    let systemPower = SystemPowerService()
+
+    /// Whether this Mac runs on Apple Silicon. Closed-lid keep-awake behaves
+    /// differently here (see `closedLidWarning`).
+    static let isAppleSilicon: Bool = {
+        var value: Int32 = 0
+        var size = MemoryLayout<Int32>.size
+        let ok = sysctlbyname("hw.optional.arm64", &value, &size, nil, 0)
+        return ok == 0 && value == 1
+    }()
 
     // Session state
     private(set) var isActive = false
@@ -128,8 +149,29 @@ final class AppController {
 
     var statusText: String {
         if isBusy { return "Working…" }
-        if isActive { return "Lid-closed sleep prevented · \(remainingText) left" }
-        return "Normal sleep — lid closing will sleep the Mac"
+        if isActive {
+            // Only claim lid-closed operation when it's actually true (see
+            // `canKeepAwakeWithLidClosed`); otherwise be honest that we hold the
+            // Mac awake with the lid *open*.
+            return canKeepAwakeWithLidClosed
+                ? "Awake, even with the lid closed · \(remainingText) left"
+                : "Keeping this Mac awake · \(remainingText) left"
+        }
+        return "Normal sleep — closing the lid will sleep the Mac"
+    }
+
+    /// Whether this Mac can actually be held awake with the lid **physically
+    /// closed**. This is the honest core of the app:
+    /// - **Apple Silicon**: since macOS Ventura a hardware lid sensor forces
+    ///   sleep on lid close; no software (disablesleep, caffeinate, IOKit
+    ///   assertions) beats it *unless* the Mac is in clamshell mode — an
+    ///   external display connected, on power. AC alone is not enough.
+    /// - **Intel / desktops**: `disablesleep` reliably holds through lid close.
+    /// When this is false, Insomniac still keeps the Mac awake with the lid
+    /// *open* (idle-sleep is blocked) — it just can't defeat the lid magnet.
+    var canKeepAwakeWithLidClosed: Bool {
+        guard Self.isAppleSilicon else { return true }
+        return display.hasExternalDisplay && powerSource.isOnAC
     }
 
     var menuBarSymbolName: String {
@@ -147,6 +189,34 @@ final class AppController {
         case .doNotClose: return .red
         default: return nil
         }
+    }
+
+    /// Honest caveat about closing the lid, or `nil` when lid-closed operation
+    /// is genuinely available. We surface the truth rather than silently
+    /// promising something the hardware won't deliver.
+    ///
+    /// On Apple Silicon the lid magnet forces sleep on close; the only override
+    /// is clamshell mode (external display + power). So:
+    ///   • no external display → closing the lid *will* sleep, and no app can
+    ///     stop it — the honest thing is to say so and point at the lid-open path;
+    ///   • external display but on battery → clamshell needs power.
+    /// Only shown on machines that actually have a lid (`lid.isLidClosed` is nil
+    /// on desktops), and never when `canKeepAwakeWithLidClosed` is already true.
+    var closedLidWarning: String? {
+        guard lid.isLidClosed != nil else { return nil }   // no clamshell → no lid to worry about
+        guard !canKeepAwakeWithLidClosed else { return nil }
+        if Self.isAppleSilicon && !display.hasExternalDisplay {
+            return "This Mac sleeps when you close the lid — on Apple Silicon that can't be prevented without an external display (clamshell mode). Insomniac keeps it awake with the lid open, and can turn the screen off for you."
+        }
+        // Apple Silicon + external display, but on battery.
+        return "Closing the lid works only in clamshell mode — keep this Mac plugged in, or it will sleep when the lid closes."
+    }
+
+    /// Put the display to sleep now — a manual control for the System tab. The
+    /// backlight stays off until the next input; safe whether or not a session
+    /// is running.
+    func sleepDisplayNow() {
+        DisplaySleep.now()
     }
 
     // MARK: - Toggle (FR-1, FR-2)
@@ -175,11 +245,15 @@ final class AppController {
 
         do {
             try await power.setSleepDisabled(true)
+            // Belt-and-suspenders: the system-wide flag (best-effort lid-closed)
+            // plus an in-process assertion (rock-solid lid-open idle sleep).
+            keepAwakeAssertion.acquire(reason: "Insomniac is keeping this Mac awake")
             let session = Session(startedAt: Date(), duration: duration)
             self.session = session
             isActive = true
             startCountdown()
             load.start()
+            Task { await systemPower.refresh() }
         } catch let error as PowerControlError {
             if !error.wasCancelled {
                 lastErrorMessage = error.errorDescription
@@ -196,6 +270,7 @@ final class AppController {
 
         do {
             try await power.setSleepDisabled(false)
+            keepAwakeAssertion.release()
             stopCountdown()
             load.stop()
             session = nil
@@ -203,6 +278,7 @@ final class AppController {
             chosenDuration = nil
             needsCrashRecovery = false
             notifyIfNeeded(for: reason)
+            Task { await systemPower.refresh() }
         } catch let error as PowerControlError {
             // Failing to restore is the dangerous case — keep the session
             // "active" in the UI so the user knows sleep is still disabled.

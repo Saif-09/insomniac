@@ -10,8 +10,17 @@ import SwiftUI
 
 struct MenuContent: View {
     @Environment(AppController.self) private var app
+    @State private var tab: Tab = .control
 
     private var accent: Color { app.menuBarTint ?? .accentColor }
+
+    /// The two faces of the panel: our keep-awake session ("Control") and the
+    /// live Mac power dashboard ("System").
+    private enum Tab: String, CaseIterable, Identifiable {
+        case control = "Control"
+        case system = "System"
+        var id: String { rawValue }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,7 +30,42 @@ struct MenuContent: View {
                 crashRecoveryBanner
             }
 
+            tabPicker
+
+            switch tab {
+            case .control: controlTab
+            case .system: SystemTab()
+            }
+
+            footer
+        }
+        .padding(16)
+        .frame(width: 340)
+        .animation(.easeInOut(duration: 0.18), value: tab)
+    }
+
+    // MARK: - Tab switcher
+
+    private var tabPicker: some View {
+        Picker("", selection: $tab) {
+            ForEach(Tab.allCases) { Text($0.rawValue).tag($0) }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+    }
+
+    // MARK: - Control tab (our session)
+
+    private var controlTab: some View {
+        VStack(alignment: .leading, spacing: 12) {
             heroCard
+
+            // Honest lid-close caveat — shown whenever it applies, not just once
+            // a session is running, so the truth is visible *before* you rely on it.
+            if let warning = app.closedLidWarning {
+                CaveatCard(text: warning)
+            }
+
             advisoryCard
 
             if let error = app.lastErrorMessage {
@@ -32,11 +76,7 @@ struct MenuContent: View {
             }
 
             SettingsSection()
-
-            footer
         }
-        .padding(16)
-        .frame(width: 340)
     }
 
     // MARK: - Header

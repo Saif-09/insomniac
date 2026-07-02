@@ -98,7 +98,7 @@ enum ThermalAdvisor {
             return BatteryState(
                 minimumRisk: .high,
                 durationCap: .fifteenMinutes,
-                message: "Battery is at \(percent)% — at or below your \(cutoff)% auto-stop. Plug in before closing the lid, or it will stop almost immediately.",
+                message: "Battery is at \(percent)% — at or below your \(cutoff)% auto-stop. Plug in before starting, or it will stop almost immediately.",
                 discourageStart: true
             )
         }
@@ -109,7 +109,7 @@ enum ThermalAdvisor {
             return BatteryState(
                 minimumRisk: .moderate,
                 durationCap: .oneHour,
-                message: "Battery is low at \(percent)% — on battery this is a short session. Plug in to close the lid for longer."
+                message: "Battery is low at \(percent)% — on battery this is a short session. Plug in for a longer one."
             )
         }
 
@@ -133,7 +133,7 @@ enum ThermalAdvisor {
         let power = inputs.isOnAC ? "on power" : "on battery"
         switch risk {
         case .low:
-            return "System is cool and \(power) — safe to close the lid for a long session."
+            return "System is cool and \(power) — good for a long session."
         case .moderate:
             return "System is warming under load — suggest a 1-hour cap and keep it on a hard surface."
         case .high:

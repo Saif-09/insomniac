@@ -16,7 +16,9 @@
 #   1. ./Scripts/package.sh
 #   2. create the GitHub release (tag vX.Y.Z) and attach build/insomniac.dmg
 #   3. ./Scripts/update_appcast.sh
-#   4. commit + push docs/appcast.xml (GitHub Pages serves it)
+#   4. commit + push docs/appcast.xml (Vercel auto-deploys it to
+#      insomniac.ziyarex.com; GitHub Pages serves the same file for older
+#      installs whose feed URL still points there)
 #
 # Shipping the appcast before the release asset exists points every running copy
 # of the app at a 404.

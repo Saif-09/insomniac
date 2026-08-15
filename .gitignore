@@ -11,3 +11,7 @@ xcuserdata/
 # Swift Package Manager
 .swiftpm/
 Packages/
+
+# Vercel
+.vercel/
+.env.local

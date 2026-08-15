@@ -9,7 +9,7 @@ Insomniac ships two ways:
 | Signing | Developer ID Application, notarized | Apple Distribution + 3rd Party Mac Developer Installer |
 | Sandbox | No | Yes |
 | Keep-awake | IOKit assertion **+** `pmset disablesleep` via privileged helper | IOKit assertion only |
-| Updates | Sparkle (appcast on GitHub Pages) | The App Store |
+| Updates | Sparkle (appcast on insomniac.ziyarex.com) | The App Store |
 | Script | `./Scripts/package.sh` | `./Scripts/appstore.sh` |
 
 Both build from the same sources; `APP_STORE` is defined only for the App Store
@@ -41,7 +41,9 @@ every running copy of the app at a 404.
 2. Write `docs/release-notes/<version>.html` (shown inside Sparkle's update sheet).
 3. Create the GitHub release, tag `v<version>`, attach `build/insomniac.dmg`.
 4. `./Scripts/update_appcast.sh` → writes `docs/appcast.xml`.
-5. Commit and push `docs/` (GitHub Pages serves the appcast).
+5. Commit and push `docs/` — Vercel is connected to this repo and
+   auto-deploys it to <https://insomniac.ziyarex.com>, so pushing is the
+   publish step.
 
 ### Why `archive`/`exportArchive` and not `codesign --force`
 
@@ -146,5 +148,24 @@ can't do that either without clamshell mode.
   `Release-appstore` products directory. Without it, `Insomniac.app` and
   `insomniac.app` collide on a case-insensitive filesystem and the second build
   silently overwrites the first.
-- Hosting: any static host works. Serve the stapled `.dmg`; no special server
-  config needed.
+
+---
+
+## Hosting
+
+The site and the Sparkle appcast are served from `docs/` at
+<https://insomniac.ziyarex.com>, on Vercel, connected to this repo — pushing to
+`main` deploys it. `vercel.json` pins the project to a static build with
+`outputDirectory: docs` (the auto-created project defaulted to Vercel's
+`services` framework, which fails to deploy with nothing declared).
+
+**GitHub Pages is deliberately left switched on.** Every copy of 1.0.4 already
+in the wild has `https://saif-09.github.io/insomniac/appcast.xml` baked into it
+and will poll that URL forever. Both hosts serve the same `docs/` from the same
+repo, so one push keeps both current and those installs keep updating. Don't
+disable Pages until no one is running a build older than the switch — and note
+that adding a `docs/CNAME` would make Pages *redirect* the old URL instead of
+serving it, which is a slower path to the same place but depends on Sparkle
+following redirects.
+
+The `.dmg` itself is served from GitHub Releases, not from either host.

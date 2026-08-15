@@ -1,0 +1,11 @@
+# Only docs/ is served (vercel.json outputDirectory). Everything else is source,
+# build output, or marketing assets that don't belong on the web host.
+build/
+AppStore/
+insomniac/
+Helper/
+Shared/
+Config/
+Scripts/
+insomniac.xcodeproj/
+*.md

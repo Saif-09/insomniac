@@ -1,89 +1,137 @@
 # Publishing insomniac
 
-insomniac **cannot** ship on the Mac App Store: its core feature (`pmset
-disablesleep` via a privileged helper) is incompatible with the App Sandbox the
-store requires. So distribution is a **Developer-ID-signed, notarized direct
-download** (a `.dmg`). This is the standard path for utilities like this.
+Insomniac ships two ways:
 
-## TL;DR
+| | Direct download | Mac App Store |
+|---|---|---|
+| Target | `insomniac` | `insomniac-mas` |
+| Bundle ID | `dev.saif.insomniac` | `dev.saif.insomniac.mas` |
+| Signing | Developer ID Application, notarized | Apple Distribution + 3rd Party Mac Developer Installer |
+| Sandbox | No | Yes |
+| Keep-awake | IOKit assertion **+** `pmset disablesleep` via privileged helper | IOKit assertion only |
+| Updates | Sparkle (appcast on GitHub Pages) | The App Store |
+| Script | `./Scripts/package.sh` | `./Scripts/appstore.sh` |
 
-```bash
-./Scripts/package.sh                       # build + DMG (un-notarized on a free account)
-NOTARY_PROFILE=insomniac-notary ./Scripts/package.sh   # full notarized DMG (paid program)
-```
-
-Output: `build/insomniac.dmg`.
-
----
-
-## Where things stand on this machine
-
-- ✅ App builds, signs (Apple Development), and runs.
-- ✅ App icon set.
-- ❌ **No "Developer ID Application" certificate** installed.
-- ❌ **No notarization credentials** configured.
-- ❌ Account is a **free Apple ID** — so the two items above aren't obtainable yet.
-
-### What a free Apple ID can do *today*
-`./Scripts/package.sh` produces a working `build/insomniac.dmg`, but it is **not
-notarized**. Anyone you send it to will get Gatekeeper's "can't be opened"
-warning and must **right-click the app → Open → Open** the first time (or you can
-tell them to run `xattr -dr com.apple.quarantine /Applications/insomniac.app`).
-Fine for yourself and a few testers; not acceptable for public distribution.
+Both build from the same sources; `APP_STORE` is defined only for the App Store
+target, and everything the sandbox forbids is fenced behind `#if !APP_STORE`.
 
 ---
 
-## To publish properly (one-time setup, needs the paid program)
-
-### 1. Join the Apple Developer Program
-$99/yr at <https://developer.apple.com/programs/>. A free Apple ID cannot create
-a Developer ID certificate or notarize.
-
-### 2. Create a "Developer ID Application" certificate
-Xcode → **Settings → Accounts** → select your team → **Manage Certificates…** →
-**＋ → Developer ID Application**. Confirm it's installed:
+## Direct download (.dmg)
 
 ```bash
-security find-identity -v -p codesigning | grep "Developer ID Application"
+./Scripts/package.sh                    # archive → Developer ID → notarize → DMG
+SKIP_NOTARIZE=1 ./Scripts/package.sh    # same, minus the notary round-trip
 ```
 
-### 3. Store notarization credentials once
-Create an app-specific password at <https://account.apple.com> (Sign-In &
-Security → App-Specific Passwords), then:
+Output: `build/insomniac.dmg` — signed, hardened-runtime, notarized, stapled.
+Verify with:
+
+```bash
+spctl -a -t open --context context:primary-signature -v build/insomniac.dmg
+# → accepted / source=Notarized Developer ID
+```
+
+### Releasing
+
+Order matters — publishing the appcast before the release asset exists points
+every running copy of the app at a 404.
+
+1. `./Scripts/package.sh`
+2. Write `docs/release-notes/<version>.html` (shown inside Sparkle's update sheet).
+3. Create the GitHub release, tag `v<version>`, attach `build/insomniac.dmg`.
+4. `./Scripts/update_appcast.sh` → writes `docs/appcast.xml`.
+5. Commit and push `docs/` (GitHub Pages serves the appcast).
+
+### Why `archive`/`exportArchive` and not `codesign --force`
+
+The bundle contains a privileged helper *and* `Sparkle.framework`, and Sparkle
+nests XPC services that carry their own entitlements. Re-signing that from the
+outside with `codesign --force` (no `--entitlements`) silently strips them: the
+result passes `codesign --verify` and then fails to update. Exporting the
+archive signs every nested component inside-out with the right identity and
+entitlements.
+
+### Notarization credentials
+
+Stored once in the keychain as the `insomniac-notary` profile:
 
 ```bash
 xcrun notarytool store-credentials insomniac-notary \
-  --apple-id "you@example.com" \
-  --team-id "DTQF9KJP6S" \
-  --password "abcd-efgh-ijkl-mnop"   # the app-specific password
+  --key ~/.appstoreconnect/private_keys/AuthKey_C6U4RB9DZ6.p8 \
+  --key-id C6U4RB9DZ6 \
+  --issuer <issuer-uuid>
 ```
 
-### 4. Build the notarized DMG
+Confirm it works with `xcrun notarytool history --keychain-profile insomniac-notary`.
+
+### Sparkle signing key
+
+Updates are signed with an EdDSA key pair. The **public** half is in
+`Config/Info-insomniac.plist` as `SUPublicEDKey`; the **private** half lives in
+the login keychain and is never committed. Sparkle refuses any update whose
+signature doesn't verify against the public key — which matters here
+specifically because this app installs a privileged helper, so an appcast-host
+compromise must not be enough to ship code.
+
+**Back the private key up now** (`generate_keys -x`, from the Sparkle tools that
+`update_appcast.sh` downloads into `build/sparkle-tools/`). If it is lost, no
+existing installation can ever be updated again — they would all have to
+reinstall by hand.
+
+---
+
+## Mac App Store (.pkg)
 
 ```bash
-NOTARY_PROFILE=insomniac-notary ./Scripts/package.sh
+./Scripts/appstore.sh --no-upload   # build + validate
+./Scripts/appstore.sh               # build + validate + upload
 ```
 
-The script will: re-sign the app + helper with Developer ID and the Hardened
-Runtime, build the DMG, submit to Apple's notary service, wait, and staple the
-ticket. The result is a clean double-clickable download.
+### Two one-time manual steps
 
-### 5. Verify before shipping
+Both are Apple-side limitations, not bugs in the scripts:
 
-```bash
-spctl -a -t open --context context:primary-signature -v build/insomniac.dmg   # → accepted
-codesign --verify --deep --strict --verbose=2 "/Volumes/insomniac/insomniac.app"
-```
+1. **The app record must be created in the web UI.** The App Store Connect API
+   refuses it: `POST /v1/apps` → *"The resource 'apps' does not allow 'CREATE'"*.
+   Create it once (see `docs/app-store-listing.md` for every field). Until it
+   exists, upload fails with *"Cannot determine the Apple ID from Bundle ID"*,
+   which reads like a signing problem and isn't.
+
+2. **Signing runs off the Xcode-logged-in Apple ID, not the API key.** The API
+   key notarizes and uploads fine, but lacks permission to create bundle IDs or
+   distribution profiles — passing `-authenticationKey*` to `exportArchive`
+   fails with *"Cloud signing permission error"*. Grant that key Admin access
+   in App Store Connect → Users and Access → Integrations if you want the
+   script to be self-contained on a machine where Xcode isn't signed in.
+
+### What the sandboxed build gives up
+
+- The system-wide `SleepDisabled` flag and the sleep-timer readouts — no public
+  API exists (`IOPMCopySystemPowerSettings` / `IOPMCopyPMPreferences` are
+  private), so the System tab omits those rows.
+- The privileged helper, and therefore the "silent toggling" setup row.
+- Crash recovery, which is meaningless without a persistent flag: an IOKit
+  assertion dies with the process.
+- Sparkle, and the quarantine self-heal.
+
+It keeps the timer, both safety cutoffs, the advisory, weather, notifications,
+open-at-login, and the "keeping your Mac awake" list (`IOPMCopyAssertionsByProcess`
+is public and sandbox-safe).
+
+In practice that costs modern laptop users very little: `disablesleep` is the
+only thing that can hold a Mac through a lid close, and on Apple Silicon it
+can't do that either without clamshell mode.
 
 ---
 
 ## Notes
 
-- **Hardened Runtime** is already enabled on both targets (required for
-  notarization).
-- The **privileged helper** is signed inside-out (helper first, then app) so the
-  app's signature seals it correctly.
-- The app is **not sandboxed** by design — keep it that way; sandboxing breaks
-  `pmset` and the SMAppService helper.
-- Hosting: any static host works (your site, GitHub Releases, etc.). Serve the
-  stapled `.dmg`; no special server config needed.
+- **Never sandbox the direct-download target.** It breaks `pmset` and the
+  SMAppService helper.
+- `CONFIGURATION_BUILD_DIR` pins the App Store target to its own
+  `Release-appstore` products directory. Without it, `Insomniac.app` and
+  `insomniac.app` collide on a case-insensitive filesystem and the second build
+  silently overwrites the first.
+- Hosting: any static host works. Serve the stapled `.dmg`; no special server
+  config needed.

@@ -8,6 +8,10 @@
 //  password when toggling.
 //
 
+// Direct-download build only. The admin-password prompt path. Sandboxed apps cannot drive AppleScript
+//  with administrator privileges.
+#if !APP_STORE
+
 import Foundation
 
 struct AppleScriptPowerController: PowerControlling {
@@ -61,3 +65,5 @@ struct AppleScriptPowerController: PowerControlling {
         }
     }
 }
+
+#endif

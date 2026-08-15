@@ -14,6 +14,10 @@
 //  privileges and is best-effort: any failure is silently ignored.
 //
 
+// Direct-download build only. Gatekeeper quarantine only exists for downloaded apps; App Store
+//  installs are never quarantined, and the sandbox forbids spawning xattr.
+#if !APP_STORE
+
 import Foundation
 import os
 
@@ -52,3 +56,5 @@ enum QuarantineCleaner {
         return size >= 0
     }
 }
+
+#endif

@@ -7,6 +7,9 @@
 //  Items once, after which toggling sleep is silent.
 //
 
+// Direct-download build only. Registers the privileged LaunchDaemon, which the App Store forbids.
+#if !APP_STORE
+
 import Foundation
 import ServiceManagement
 import Observation
@@ -80,3 +83,5 @@ final class HelperInstaller {
         SMAppService.openSystemSettingsLoginItems()
     }
 }
+
+#endif

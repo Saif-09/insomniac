@@ -6,6 +6,10 @@
 //  (`pmset -g`) and needs no privileges — used for crash recovery (FR-14).
 //
 
+// Direct-download build only. Reads the system-wide disablesleep flag via pmset — no subprocesses
+//  under the sandbox, and the flag is not something that build ever sets.
+#if !APP_STORE
+
 import Foundation
 
 enum SystemSleepState {
@@ -51,3 +55,5 @@ enum SystemSleepState {
         }
     }
 }
+
+#endif

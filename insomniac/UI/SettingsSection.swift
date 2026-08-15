@@ -72,8 +72,12 @@ struct SettingsSection: View {
                 weatherRows
             }
             group("Setup") {
+                #if !APP_STORE
+                // Silent toggling needs the privileged helper, which only the
+                // direct-download build ships.
                 helperRow.rowPadding()
                 separator
+                #endif
                 welcomeRow.rowPadding()
             }
         }
@@ -249,6 +253,16 @@ struct SettingsSection: View {
         }
     }
 
+    /// The walkthrough no longer opens on every launch (it's first-run only), so
+    /// this is how you get it back. Both builds.
+    private var welcomeRow: some View {
+        SettingRow(icon: "sparkles", title: "Welcome walkthrough") {
+            Button("Show") { OnboardingController.shared.presentWelcome() }
+                .controlSize(.small)
+        }
+    }
+
+    #if !APP_STORE
     // Privileged helper (M4, FR-9): silent toggling after one-time setup.
     private var helperRow: some View {
         HStack(spacing: 10) {
@@ -279,15 +293,6 @@ struct SettingsSection: View {
         }
     }
 
-    /// The walkthrough no longer opens on every launch (it's first-run only), so
-    /// this is how you get it back.
-    private var welcomeRow: some View {
-        SettingRow(icon: "sparkles", title: "Welcome walkthrough") {
-            Button("Show") { OnboardingController.shared.presentWelcome() }
-                .controlSize(.small)
-        }
-    }
-
     @ViewBuilder
     private var helperAction: some View {
         switch app.helperInstaller.state {
@@ -301,6 +306,7 @@ struct SettingsSection: View {
                 .controlSize(.small)
         }
     }
+    #endif
 }
 
 private extension View {

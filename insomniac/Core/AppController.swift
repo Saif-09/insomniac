@@ -26,7 +26,9 @@ final class AppController {
     let lid = LidMonitor()
     let display = DisplayMonitor()
     let weather = WeatherService()
+    #if !APP_STORE
     let helperInstaller = HelperInstaller()
+    #endif
     let loginItem = LoginItem()
     private let geo = IPGeolocationService()
     private let notifier = NotificationManager()
@@ -176,8 +178,16 @@ final class AppController {
     /// When this is false, Insomniac still keeps the Mac awake with the lid
     /// *open* (idle-sleep is blocked) — it just can't defeat the lid magnet.
     var canKeepAwakeWithLidClosed: Bool {
+        #if APP_STORE
+        // The sandboxed build has no `disablesleep` at all — its keep-awake is
+        // an IOKit assertion, and no assertion survives a lid close on any Mac.
+        // Clamshell mode is the only lid-closed path, and that's macOS's doing,
+        // not ours. Same answer on Intel as on Apple Silicon.
+        return display.hasExternalDisplay && powerSource.isOnAC
+        #else
         guard Self.isAppleSilicon else { return true }
         return display.hasExternalDisplay && powerSource.isOnAC
+        #endif
     }
 
     var menuBarSymbolName: String {
@@ -211,10 +221,18 @@ final class AppController {
     var closedLidWarning: String? {
         guard lid.isLidClosed != nil else { return nil }   // no clamshell → no lid to worry about
         guard !canKeepAwakeWithLidClosed else { return nil }
-        if Self.isAppleSilicon && !display.hasExternalDisplay {
-            return "This Mac sleeps when you close the lid — on Apple Silicon that can't be prevented without an external display (clamshell mode). Insomniac keeps it awake with the lid open, and can turn the screen off for you."
+        if !display.hasExternalDisplay {
+            // Don't blame Apple Silicon in a build where the limit isn't about
+            // the chip: the App Store build can't hold a lid close on any Mac.
+            #if APP_STORE
+            return "This Mac sleeps when you close the lid — only clamshell mode (an external display, on power) keeps it running with the lid shut. Insomniac keeps it awake with the lid open, and can turn the screen off for you."
+            #else
+            return Self.isAppleSilicon
+                ? "This Mac sleeps when you close the lid — on Apple Silicon that can't be prevented without an external display (clamshell mode). Insomniac keeps it awake with the lid open, and can turn the screen off for you."
+                : "Closing the lid works only in clamshell mode — connect an external display, or keep the lid open."
+            #endif
         }
-        // Apple Silicon + external display, but on battery.
+        // External display attached, but on battery.
         return "Closing the lid works only in clamshell mode — keep this Mac plugged in, or it will sleep when the lid closes."
     }
 
@@ -383,6 +401,13 @@ final class AppController {
     // MARK: - Crash recovery (FR-14)
 
     private func checkForCrashRecovery() {
+        #if APP_STORE
+        // Nothing to recover: the sandboxed build's keep-awake is an in-process
+        // IOKit assertion, which the kernel releases the instant we die. There
+        // is no persistent flag left behind, so there is no crash to recover
+        // from — and a `SleepDisabled` we didn't set isn't ours to clear.
+        return
+        #else
         // Only meaningful when we have no active session of our own.
         guard !isActive else { return }
         // `isSleepDisabled()` spawns `pmset -g` and waits for it. Doing that
@@ -394,6 +419,7 @@ final class AppController {
             guard !self.isActive, disabled == true else { return }
             self.needsCrashRecovery = true
         }
+        #endif
     }
 
     func resolveCrashRecovery() {

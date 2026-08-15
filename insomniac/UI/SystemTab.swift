@@ -60,17 +60,21 @@ struct SystemTab: View {
             }
             .rowPadding()
 
-            separator
+            if PowerSnapshot.reportsSystemSettings {
+                separator
 
-            // The authoritative OS flag — lets the user verify our toggle really
-            // took effect. A divergence (we're active but the flag is off) is
-            // surfaced in orange so it can't hide.
-            SettingRow(icon: "gauge.with.dots.needle.bottom.50percent", title: "System sleep flag") {
-                Text(sleepFlag.text)
-                    .font(.callout.weight(.medium))
-                    .foregroundStyle(sleepFlag.color)
+                // The authoritative OS flag — lets the user verify our toggle
+                // really took effect. A divergence (we're active but the flag is
+                // off) is surfaced in orange so it can't hide. Unreadable in the
+                // sandboxed build, which doesn't set it either, so the row is
+                // omitted there instead of sitting on a permanent "Checking…".
+                SettingRow(icon: "gauge.with.dots.needle.bottom.50percent", title: "System sleep flag") {
+                    Text(sleepFlag.text)
+                        .font(.callout.weight(.medium))
+                        .foregroundStyle(sleepFlag.color)
+                }
+                .rowPadding()
             }
-            .rowPadding()
         }
     }
 
@@ -174,21 +178,24 @@ struct SystemTab: View {
             }
             .rowPadding()
 
-            separator
+            // The OS sleep timers have no public API — direct-download only.
+            if PowerSnapshot.reportsSystemSettings {
+                separator
 
-            SettingRow(icon: "display", title: "Display sleeps") {
-                Text(minutesText(snapshot?.displaySleepMinutes))
-                    .font(.callout.weight(.medium)).foregroundStyle(.secondary)
+                SettingRow(icon: "display", title: "Display sleeps") {
+                    Text(minutesText(snapshot?.displaySleepMinutes))
+                        .font(.callout.weight(.medium)).foregroundStyle(.secondary)
+                }
+                .rowPadding()
+
+                separator
+
+                SettingRow(icon: "powersleep", title: "System sleeps") {
+                    Text(minutesText(snapshot?.idleSleepMinutes))
+                        .font(.callout.weight(.medium)).foregroundStyle(.secondary)
+                }
+                .rowPadding()
             }
-            .rowPadding()
-
-            separator
-
-            SettingRow(icon: "powersleep", title: "System sleeps") {
-                Text(minutesText(snapshot?.idleSleepMinutes))
-                    .font(.callout.weight(.medium)).foregroundStyle(.secondary)
-            }
-            .rowPadding()
         }
     }
 
@@ -257,18 +264,6 @@ struct SystemTab: View {
         Divider().opacity(0.5).padding(.leading, 30)
     }
 
-    private func caveatCard(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 9) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.caption)
-                .foregroundStyle(.yellow)
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .card(tint: .yellow, fill: 0.14, stroke: 0.28)
-    }
 }
 
 private extension View {

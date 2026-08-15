@@ -6,18 +6,24 @@
 //  "System" control-center tab — the ground truth, straight from the OS, not our
 //  own idea of it. Two privilege-free probes:
 //
-//    • `pmset -g`            → the `SleepDisabled` flag + the idle-sleep and
-//                              display-sleep timers currently in effect.
-//    • `pmset -g assertions` → every process currently holding a sleep-
-//                              preventing power assertion ("what's keeping your
-//                              Mac awake"), with its name and reason.
+//    • `IOPMCopyAssertionsByProcess()` → every process currently holding a
+//      sleep-preventing power assertion ("what's keeping your Mac awake").
+//      This is public IOKit, it hands back a resolved "Process Name" for each
+//      assertion, and it works inside the App Sandbox — so it is the one path
+//      both the direct-download and App Store builds share. (It replaced a
+//      regex over `pmset -g assertions`, which was both fragile and a
+//      subprocess spawn every three seconds while the tab was open.)
 //
-//  We shell out to `pmset` (consistent with SystemSleepState/DisplaySleep) rather
-//  than reweaving the IOKit assertion dictionary, because pmset already resolves
-//  PIDs to human process names for us.
+//    • `pmset -g` → the `SleepDisabled` flag and the idle/display sleep timers.
+//      There is no public API for these (IOPMCopySystemPowerSettings and
+//      IOPMCopyPMPreferences are private), so this probe is direct-download
+//      only; the sandboxed build simply reports them as unavailable and the
+//      System tab hides those rows.
 //
 
 import Foundation
+import IOKit
+import IOKit.pwr_mgt
 
 // MARK: - Snapshot value types
 
@@ -40,8 +46,9 @@ struct SleepPreventer: Identifiable, Sendable, Equatable {
         case system       // PreventSystemSleep
         case display      // PreventUserIdleDisplaySleep
 
-        nonisolated init?(pmsetType: String) {
-            switch pmsetType {
+        /// Maps an IOKit `AssertType` string (the same tokens `pmset` prints).
+        nonisolated init?(assertionType: String) {
+            switch assertionType {
             case "PreventUserIdleSystemSleep": self = .idleSystem
             case "PreventSystemSleep": self = .system
             case "PreventUserIdleDisplaySleep": self = .display
@@ -71,6 +78,7 @@ struct SleepPreventer: Identifiable, Sendable, Equatable {
 /// An immutable read of the system power state at a moment in time.
 struct PowerSnapshot: Sendable, Equatable {
     /// The `pmset` `SleepDisabled` flag — the exact thing our toggle controls.
+    /// Always `nil` in the sandboxed build (no public API for it).
     var sleepDisabled: Bool?
     /// Idle-sleep timer in minutes (0 == never), as currently in use.
     var idleSleepMinutes: Int?
@@ -79,6 +87,16 @@ struct PowerSnapshot: Sendable, Equatable {
     /// Processes currently preventing sleep, most-relevant first.
     var preventers: [SleepPreventer]
     var capturedAt: Date
+
+    /// Whether this build can read the system flag and sleep timers at all.
+    /// The System tab hides those rows rather than showing a permanent "—".
+    static var reportsSystemSettings: Bool {
+        #if APP_STORE
+        return false
+        #else
+        return true
+        #endif
+    }
 }
 
 // MARK: - Service
@@ -101,19 +119,79 @@ final class SystemPowerService {
     // MARK: - Capture (off the main actor)
 
     nonisolated private static func capture(selfPID: Int32) async -> PowerSnapshot {
-        async let general = runPmset(["-g"])
-        async let assertions = runPmset(["-g", "assertions"])
-        let g = await general ?? ""
-        let a = await assertions ?? ""
+        let preventers = copyPreventers(selfPID: Int(selfPID))
+        #if APP_STORE
+        // No public API for the SleepDisabled flag or the sleep timers, and the
+        // sandbox forbids shelling out to pmset. Report them as unknown; the UI
+        // hides those rows in this build rather than showing a dead "—".
+        return PowerSnapshot(
+            sleepDisabled: nil,
+            idleSleepMinutes: nil,
+            displaySleepMinutes: nil,
+            preventers: preventers,
+            capturedAt: Date()
+        )
+        #else
+        let g = await runPmset(["-g"]) ?? ""
         return PowerSnapshot(
             sleepDisabled: parseSleepDisabled(g),
             idleSleepMinutes: parseIntSetting(g, key: "sleep"),
             displaySleepMinutes: parseIntSetting(g, key: "displaysleep"),
-            preventers: parsePreventers(a, selfPID: Int(selfPID)),
+            preventers: preventers,
             capturedAt: Date()
         )
+        #endif
     }
 
+    // MARK: - Preventers (public IOKit, sandbox-safe)
+
+    /// Every process currently holding a sleep-preventing assertion.
+    ///
+    /// `IOPMCopyAssertionsByProcess` returns `[pid: [assertion dict]]`, and each
+    /// dict already carries a resolved `Process Name` — so unlike the old pmset
+    /// parse there is no PID→name lookup to do and nothing to regex. We keep
+    /// only assertions that are actually *on* (`AssertLevel` non-zero) and whose
+    /// type is one of the three families we surface; the noisy bookkeeping
+    /// assertions (UserIsActive, BackgroundTask, push) fall out via `Kind`.
+    nonisolated private static func copyPreventers(selfPID: Int) -> [SleepPreventer] {
+        var raw: Unmanaged<CFDictionary>?
+        guard IOPMCopyAssertionsByProcess(&raw) == kIOReturnSuccess,
+              let byProcess = raw?.takeRetainedValue() as? [NSNumber: [[String: Any]]]
+        else { return [] }
+
+        var result: [SleepPreventer] = []
+        for (pidNumber, assertions) in byProcess {
+            let pid = pidNumber.intValue
+            for assertion in assertions {
+                guard let type = assertion["AssertType"] as? String,
+                      let kind = SleepPreventer.Kind(assertionType: type),
+                      (assertion["AssertLevel"] as? Int ?? 0) != 0
+                else { continue }
+
+                let process = (assertion["Process Name"] as? String)
+                    .flatMap { $0.isEmpty ? nil : $0 } ?? "pid \(pid)"
+                let reason = assertion["AssertName"] as? String ?? ""
+                let isSelf = pid == selfPID
+                result.append(
+                    SleepPreventer(pid: pid, process: process, kind: kind, reason: reason, isSelf: isSelf)
+                )
+            }
+        }
+        return sorted(result)
+    }
+
+    /// Our own assertion first, then strongest assertion type, then name.
+    nonisolated private static func sorted(_ preventers: [SleepPreventer]) -> [SleepPreventer] {
+        preventers.sorted { lhs, rhs in
+            if lhs.isSelf != rhs.isSelf { return lhs.isSelf }
+            if lhs.kind != rhs.kind { return lhs.kind.rawValue < rhs.kind.rawValue }
+            return lhs.process.localizedCaseInsensitiveCompare(rhs.process) == .orderedAscending
+        }
+    }
+
+    // MARK: - System settings (direct-download build only)
+
+    #if !APP_STORE
     /// Run `/usr/bin/pmset <args>` on a utility queue and return stdout.
     nonisolated private static func runPmset(_ args: [String]) async -> String? {
         await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
@@ -136,8 +214,6 @@ final class SystemPowerService {
         }
     }
 
-    // MARK: - Parsing (pure, testable)
-
     nonisolated private static func parseSleepDisabled(_ output: String) -> Bool? {
         for line in output.split(separator: "\n") {
             guard line.lowercased().contains("sleepdisabled") else { continue }
@@ -158,36 +234,5 @@ final class SystemPowerService {
         return nil
     }
 
-    /// Parse the "Listed by owning process" block of `pmset -g assertions`.
-    nonisolated private static func parsePreventers(_ output: String, selfPID: Int) -> [SleepPreventer] {
-        guard let range = output.range(of: "Listed by owning process:") else { return [] }
-        let tail = output[range.upperBound...]
-
-        // pid 4057(WhatsApp): [0x..] 38:11:42 PreventUserIdleSystemSleep named: "reason"
-        let pattern = #"pid\s+(\d+)\((.*?)\):\s*\[[^\]]*\]\s*[0-9:]+\s+(\w+)\s+named:\s*"(.*?)""#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
-
-        var result: [SleepPreventer] = []
-        for rawLine in tail.split(separator: "\n") {
-            let line = String(rawLine)
-            if line.contains("Kernel Assertions") { break }
-            let ns = line as NSString
-            guard let m = regex.firstMatch(in: line, range: NSRange(location: 0, length: ns.length)),
-                  m.numberOfRanges == 5 else { continue }
-            let pid = Int(ns.substring(with: m.range(at: 1))) ?? -1
-            let process = ns.substring(with: m.range(at: 2))
-            let type = ns.substring(with: m.range(at: 3))
-            let reason = ns.substring(with: m.range(at: 4))
-            guard let kind = SleepPreventer.Kind(pmsetType: type) else { continue }
-            let isSelf = pid == selfPID || process.localizedCaseInsensitiveContains("insomniac")
-            result.append(SleepPreventer(pid: pid, process: process, kind: kind, reason: reason, isSelf: isSelf))
-        }
-
-        // Our own assertion first, then strongest assertion type, then name.
-        return result.sorted { lhs, rhs in
-            if lhs.isSelf != rhs.isSelf { return lhs.isSelf }
-            if lhs.kind != rhs.kind { return lhs.kind.rawValue < rhs.kind.rawValue }
-            return lhs.process.localizedCaseInsensitiveCompare(rhs.process) == .orderedAscending
-        }
-    }
+    #endif
 }

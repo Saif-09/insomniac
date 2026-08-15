@@ -10,9 +10,12 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if !APP_STORE
         // Strip our own Gatekeeper quarantine so the "Not Opened" warning never
-        // recurs for this build (best-effort, off the main thread).
+        // recurs for this build (best-effort, off the main thread). App Store
+        // installs are never quarantined, so this is direct-download only.
         QuarantineCleaner.selfHeal()
+        #endif
 
         MainActor.assumeIsolated {
             // First launch only. Re-showing the welcome window on every launch

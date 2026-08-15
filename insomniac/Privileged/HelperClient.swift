@@ -8,6 +8,9 @@
 //  rest of the app doesn't care which is in use.
 //
 
+// Direct-download build only. XPC client for the privileged LaunchDaemon, which the App Store forbids.
+#if !APP_STORE
+
 import Foundation
 import ServiceManagement
 
@@ -80,3 +83,5 @@ final class HelperClient: PowerControlling {
         }
     }
 }
+
+#endif

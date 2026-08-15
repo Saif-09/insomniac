@@ -105,10 +105,11 @@ analytics, no tracking. It collects nothing about you.
 awake,caffeine,sleep,insomnia,nosleep,display,screen,timer,menubar,battery,thermal,download,render
 ```
 
-## Support / Marketing URL
+## URLs
 
-- Support URL: `https://saif-09.github.io/insomniac/`
-- Marketing URL: `https://saif-09.github.io/insomniac/`
+- Privacy Policy URL (**required**): `https://insomniac.ziyarex.com/privacy.html`
+- Support URL (**required**): `https://insomniac.ziyarex.com/`
+- Marketing URL: `https://insomniac.ziyarex.com/`
 
 ## App Privacy
 
@@ -141,18 +142,20 @@ this in App Store Connect once sets `ITSAppUsesNonExemptEncryption` for you.
 
 4+ — no objectionable content of any kind.
 
-## Screenshots (required — 1280×800 or 1440×900, at least one)
+## Screenshots
 
-This is the only part that genuinely needs a human. Suggested set:
+Four, already generated, in `AppStore/screenshots/` at 2560×1600 (an accepted
+size). Regenerate with `./Scripts/screenshots.sh`.
 
-1. The menu open on the **Control** tab with a session running (countdown ring
-   visible, advisory card green).
-2. The **System** tab showing the "keeping your Mac awake" list.
-3. Settings expanded, showing the safety cutoffs.
-4. The honest closed-lid caveat card — it's a differentiator, not a weakness.
+| File | Shows |
+|---|---|
+| `01-stay-awake.png` | A running session — the switch, countdown ring and advisory |
+| `02-auto-off.png` | The auto-off picker — the timer that always turns it back |
+| `03-system.png` | The System tab — what's keeping the Mac awake |
+| `04-safety.png` | Settings — the thermal and low-battery cutoffs |
 
-Grab them with ⇧⌘4 then Space to capture the window with its shadow, on a
-plain desktop background.
+They render the app's real SwiftUI views, and are built from the **App Store**
+target so they can only ever show features that build actually has.
 
 ## Review notes
 

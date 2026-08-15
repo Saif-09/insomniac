@@ -19,7 +19,7 @@
 	  existing users cannot be updated; back it up with `generate_keys -x`.
 	-->
 	<key>SUFeedURL</key>
-	<string>https://saif-09.github.io/insomniac/appcast.xml</string>
+	<string>https://insomniac.ziyarex.com/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>4zfQv8InWst/zjsl4qZqYIzoaX+52iHiuZmB2ca4N/g=</string>
 	<key>SUEnableAutomaticChecks</key>

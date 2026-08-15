@@ -60,7 +60,7 @@ fi
 echo "▶ Generating appcast…"
 "$TOOLS/bin/generate_appcast" \
   --download-url-prefix "https://github.com/${REPO}/releases/download/v${VERSION}/" \
-  --link "https://saif-09.github.io/insomniac/" \
+  --link "https://insomniac.ziyarex.com/" \
   --maximum-versions 5 \
   "$STAGING"
 

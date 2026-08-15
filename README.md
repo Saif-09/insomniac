@@ -4,7 +4,7 @@ Keep your Mac awake — safely. A menu-bar utility that blocks idle sleep for a
 duration you choose, and actively advises how long that's safe based on the
 machine's live thermal state, auto-stopping before things get too hot.
 
-### [**Download &amp; install → saif-09.github.io/insomniac**](https://saif-09.github.io/insomniac/)
+### [**Download &amp; install → insomniac.ziyarex.com**](https://insomniac.ziyarex.com/)
 
 Signed with a Developer ID certificate and notarized by Apple — drag it to
 Applications and open it. Direct link to the latest build:

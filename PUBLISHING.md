@@ -5,7 +5,7 @@ Insomniac ships two ways:
 | | Direct download | Mac App Store |
 |---|---|---|
 | Target | `insomniac` | `insomniac-mas` |
-| Bundle ID | `dev.saif.insomniac` | `dev.saif.insomniac.mas` |
+| Bundle ID | `dev.saif.insomniac` | `app.ziyarex.insomniac.mas` |
 | Signing | Developer ID Application, notarized | Apple Distribution + 3rd Party Mac Developer Installer |
 | Sandbox | No | Yes |
 | Keep-awake | IOKit assertion **+** `pmset disablesleep` via privileged helper | IOKit assertion only |
@@ -98,11 +98,18 @@ reinstall by hand.
 
 Both are Apple-side limitations, not bugs in the scripts:
 
-1. **The app record must be created in the web UI.** The App Store Connect API
+1. **The app record can't be created by a script.** The App Store Connect API
    refuses it: `POST /v1/apps` → *"The resource 'apps' does not allow 'CREATE'"*.
-   Create it once (see `docs/app-store-listing.md` for every field). Until it
-   exists, upload fails with *"Cannot determine the Apple ID from Bundle ID"*,
-   which reads like a signing problem and isn't.
+   Xcode **can** create it (Product → Archive → Distribute App uses a privileged
+   endpoint the public API doesn't expose), as can the web UI. Until the record
+   exists, `altool` upload fails with *"Cannot determine the Apple ID from Bundle
+   ID"*, which reads like a signing problem and isn't.
+
+   This is already done: **Insomniac - Sleep Blocker**, app ID `6801908392`.
+   Xcode's creation step is not idempotent — running it a second time reports
+   *"the SKU/Bundle ID/name has already been used"*, which means the first
+   attempt succeeded. Cancel, re-run Distribute App, and it goes straight to
+   upload.
 
 2. **Signing runs off the Xcode-logged-in Apple ID, not the API key.** The API
    key notarizes and uploads fine, but lacks permission to create bundle IDs or

@@ -224,7 +224,7 @@ target; everything the sandbox forbids sits behind `#if !APP_STORE`.
 
 | | Direct download | Mac App Store |
 |---|---|---|
-| Target / bundle ID | `insomniac` · `dev.saif.insomniac` | `insomniac-mas` · `dev.saif.insomniac.mas` |
+| Target / bundle ID | `insomniac` · `dev.saif.insomniac` | `insomniac-mas` · `app.ziyarex.insomniac.mas` |
 | Sandbox | No | Yes |
 | Keep-awake | IOKit assertion **+** `pmset disablesleep` via the helper | IOKit assertion only |
 | Updates | Sparkle | The App Store |

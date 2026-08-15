@@ -53,14 +53,14 @@
 
 /* Begin PBXFileReference section */
 		0782ABEE2FD2E0310093E092 /* insomniac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = insomniac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		MAS0000000000000000F001 /* Insomniac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Insomniac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		MAS0000000000000000F002 /* Insomniac-MAS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Insomniac-MAS.entitlements"; sourceTree = "<group>"; };
-		SPK0000000000000000F003 /* Info-insomniac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-insomniac.plist"; sourceTree = "<group>"; };
 		CAFE0000000000000000F001 /* dev.saif.insomniac.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dev.saif.insomniac.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAFE0000000000000000F002 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		CAFE0000000000000000F003 /* HelperTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperTool.swift; sourceTree = "<group>"; };
 		CAFE0000000000000000F005 /* dev.saif.insomniac.helper.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = dev.saif.insomniac.helper.plist; sourceTree = "<group>"; };
 		CAFE0000000000000000F006 /* HelperProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperProtocol.swift; sourceTree = "<group>"; };
+		MAS0000000000000000F001 /* Insomniac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Insomniac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		MAS0000000000000000F002 /* Insomniac-MAS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Insomniac-MAS.entitlements"; sourceTree = "<group>"; };
+		SPK0000000000000000F003 /* Info-insomniac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-insomniac.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -108,15 +108,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		MAS0000000000000000G001 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				SPK0000000000000000F003 /* Info-insomniac.plist */,
-				MAS0000000000000000F002 /* Insomniac-MAS.entitlements */,
-			);
-			path = Config;
-			sourceTree = "<group>";
-		};
 		0782ABEF2FD2E0310093E092 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +134,15 @@
 				CAFE0000000000000000F006 /* HelperProtocol.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		MAS0000000000000000G001 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				SPK0000000000000000F003 /* Info-insomniac.plist */,
+				MAS0000000000000000F002 /* Insomniac-MAS.entitlements */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -174,6 +174,24 @@
 			productReference = 0782ABEE2FD2E0310093E092 /* insomniac.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CAFE0000000000000000T001 /* dev.saif.insomniac.helper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAFE0000000000000000C000 /* Build configuration list for PBXNativeTarget "dev.saif.insomniac.helper" */;
+			buildPhases = (
+				CAFE0000000000000000P001 /* Sources */,
+				CAFE0000000000000000P002 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = dev.saif.insomniac.helper;
+			packageProductDependencies = (
+			);
+			productName = dev.saif.insomniac.helper;
+			productReference = CAFE0000000000000000F001 /* dev.saif.insomniac.helper */;
+			productType = "com.apple.product-type.tool";
+		};
 		MAS0000000000000000T002 /* insomniac-mas */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = MAS0000000000000000C000 /* Build configuration list for PBXNativeTarget "insomniac-mas" */;
@@ -195,24 +213,6 @@
 			productName = "insomniac-mas";
 			productReference = MAS0000000000000000F001 /* Insomniac.app */;
 			productType = "com.apple.product-type.application";
-		};
-		CAFE0000000000000000T001 /* dev.saif.insomniac.helper */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CAFE0000000000000000C000 /* Build configuration list for PBXNativeTarget "dev.saif.insomniac.helper" */;
-			buildPhases = (
-				CAFE0000000000000000P001 /* Sources */,
-				CAFE0000000000000000P002 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = dev.saif.insomniac.helper;
-			packageProductDependencies = (
-			);
-			productName = dev.saif.insomniac.helper;
-			productReference = CAFE0000000000000000F001 /* dev.saif.insomniac.helper */;
-			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -308,25 +308,6 @@
 			targetProxy = CAFE0000000000000000X001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		SPK0000000000000000K001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sparkle-project/Sparkle";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.9.5;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		SPK0000000000000000R001 /* Sparkle */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = SPK0000000000000000K001 /* XCRemoteSwiftPackageReference "Sparkle" */;
-			productName = Sparkle;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0782ABF72FD2E0320093E092 /* Debug */ = {
@@ -463,11 +444,11 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Info-insomniac.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Insomniac;
 				INFOPLIST_KEY_CFBundleName = Insomniac;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_FILE = "Config/Info-insomniac.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -499,11 +480,11 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Info-insomniac.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Insomniac;
 				INFOPLIST_KEY_CFBundleName = Insomniac;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_FILE = "Config/Info-insomniac.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -565,6 +546,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Config/Insomniac-MAS.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)-appstore";
@@ -585,7 +567,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.4;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.saif.insomniac.mas;
+				PRODUCT_BUNDLE_IDENTIFIER = app.ziyarex.insomniac.mas;
 				PRODUCT_NAME = Insomniac;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -604,6 +586,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Config/Insomniac-MAS.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)-appstore";
@@ -624,7 +607,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.4;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.saif.insomniac.mas;
+				PRODUCT_BUNDLE_IDENTIFIER = app.ziyarex.insomniac.mas;
 				PRODUCT_NAME = Insomniac;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -677,6 +660,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		SPK0000000000000000K001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		SPK0000000000000000R001 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = SPK0000000000000000K001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0782ABE62FD2E0310093E092 /* Project object */;
 }

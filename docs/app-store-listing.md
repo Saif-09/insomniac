@@ -1,21 +1,34 @@
 # App Store Connect listing — Insomniac
 
-Everything needed to fill in the App Store Connect record. Apple's API can't
-create the app record (`POST /v1/apps` is refused outright), so the record
-itself is a one-time manual step; after that `./Scripts/appstore.sh` handles
-every build.
+Everything needed to fill in the App Store Connect record.
 
-## Create the record
+**The record already exists** — "Insomniac - Sleep Blocker", app ID `6801908392`,
+bundle ID `app.ziyarex.insomniac.mas`. It was created by Xcode's *Distribute App*
+flow. What follows is the metadata still to be filled in, plus a record of how it
+was made.
+
+> Xcode **can** create app records, via a privileged endpoint the public API
+> doesn't expose — `POST /v1/apps` on the App Store Connect API is refused
+> outright (*"the resource 'apps' does not allow 'CREATE'"*), so a script can't
+> do it, but Product → Archive → Distribute App can.
+>
+> Note that Xcode's creation step is not idempotent: run it twice and the second
+> attempt fails with *"The SKU/Bundle ID/name you entered has already been
+> used"*, which looks like a failure but actually means the first one worked.
+> Cancel and re-run Distribute App; it will find the record and go straight to
+> upload.
+
+## Creating the record (if it ever needs recreating)
 
 <https://appstoreconnect.apple.com> → **Apps → + → New App**
 
 | Field | Value |
 |---|---|
 | Platform | macOS |
-| Name | `Insomniac` |
+| Name | `Insomniac - Sleep Blocker` |
 | Primary language | English (U.S.) |
-| Bundle ID | `dev.saif.insomniac.mas` |
-| SKU | `INSOMNIAC001` |
+| Bundle ID | `app.ziyarex.insomniac.mas` |
+| SKU | `app.ziyarex.insomniac.mas` |
 | User access | Full Access |
 
 The bundle ID is deliberately **not** `dev.saif.insomniac` — that one belongs to

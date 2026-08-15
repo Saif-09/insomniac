@@ -13,11 +13,11 @@
 # ── Two things this script cannot do for you ─────────────────────────────────
 #
 # 1. Create the App Store Connect app record. Apple's API refuses it outright:
-#    `POST /v1/apps` returns "The resource 'apps' does not allow 'CREATE'".
-#    Do it once at https://appstoreconnect.apple.com → Apps → + → New App:
-#      Platform: macOS · Name: Insomniac · Bundle ID: dev.saif.insomniac.mas
-#    Until it exists, upload fails with "Cannot determine the Apple ID from
-#    Bundle ID", which sounds like a signing problem and isn't.
+#    `POST /v1/apps` returns "The resource 'apps' does not allow 'CREATE'", so no
+#    script can do it. Xcode can (Product > Archive > Distribute App), as can the
+#    web UI. Until it exists, upload fails with "Cannot determine the Apple ID
+#    from Bundle ID", which sounds like a signing problem and isn't.
+#    Already done: "Insomniac - Sleep Blocker" / app.ziyarex.insomniac.mas.
 #
 # 2. Sign with the App Store Connect API key. The key in
 #    ~/.appstoreconnect/private_keys can notarize and can upload, but it lacks

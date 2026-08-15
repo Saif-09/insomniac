@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Store build only. Deliberately minimal: the keep-awake is an IOKit
+	  power assertion, which needs no entitlement at all, and everything that
+	  did need privileges (pmset, the LaunchDaemon, the AppleScript admin
+	  prompt) is compiled out of this target via APP_STORE.
+
+	  Kept outside insomniac/ on purpose — that folder is a synchronized root
+	  group, so anything dropped in it becomes a bundle resource.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+
+	<!-- Ambient-temperature advisory: IP geolocation + the weather API.
+	     Outbound only; the app runs no server and stores nothing remotely. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

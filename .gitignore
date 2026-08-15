@@ -1,16 +1,13 @@
-# Build output
+# Build products
 build/
 DerivedData/
 *.xcarchive
 
 # Xcode user state
 xcuserdata/
-*.xcuserstate
-*.xcuserdatad
-
-# macOS
+*.xcuserdatastate
 .DS_Store
 
 # Swift Package Manager
 .swiftpm/
-.build/
+Packages/

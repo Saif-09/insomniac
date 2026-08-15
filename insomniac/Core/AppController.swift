@@ -28,6 +28,7 @@ final class AppController {
     let weather = WeatherService()
     #if !APP_STORE
     let helperInstaller = HelperInstaller()
+    let updates = UpdateController()
     #endif
     let loginItem = LoginItem()
     private let geo = IPGeolocationService()

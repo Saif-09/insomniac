@@ -58,6 +58,12 @@ struct SettingsSection: View {
         VStack(alignment: .leading, spacing: 14) {
             group("General") {
                 loginItemRows.rowPadding()
+                #if !APP_STORE
+                // The App Store build updates through the store, so it has no
+                // update controls of its own.
+                separator
+                updateRows.rowPadding()
+                #endif
             }
             group("While awake") {
                 lidRow
@@ -152,6 +158,40 @@ struct SettingsSection: View {
         }
         .onAppear { app.loginItem.refresh() }
     }
+
+    #if !APP_STORE
+    /// Automatic update checks plus a manual "Check now". Direct-download only.
+    private var updateRows: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SettingRow(
+                icon: "arrow.down.circle",
+                title: "Automatic updates",
+                subtitle: lastUpdateCheckText
+            ) {
+                Toggle("", isOn: Binding(
+                    get: { app.updates.automaticallyChecks },
+                    set: { app.updates.automaticallyChecks = $0 }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
+            }
+            HStack {
+                Spacer(minLength: 0)
+                Button("Check now") { app.updates.checkForUpdates() }
+                    .controlSize(.small)
+                    .disabled(!app.updates.canCheckForUpdates)
+            }
+        }
+    }
+
+    private var lastUpdateCheckText: String {
+        guard let date = app.updates.lastCheckDate else { return "never checked yet" }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return "last checked \(formatter.localizedString(for: date, relativeTo: Date()))"
+    }
+    #endif
 
     private var lidRow: some View {
         @Bindable var prefs = app.prefs

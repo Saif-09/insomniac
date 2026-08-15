@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Direct-download build only — the Sparkle keys.
+
+	  This is a *partial* Info.plist: GENERATE_INFOPLIST_FILE stays on, so Xcode
+	  merges its generated keys (bundle id, versions, LSUIElement, icon…) on top
+	  of this file. Only what Xcode can't generate lives here — `INFOPLIST_KEY_*`
+	  build settings work for Apple's known key list and silently drop anything
+	  else, which is exactly what happened to these three on the first attempt.
+
+	  SUPublicEDKey is the public half of the EdDSA key pair whose private half
+	  lives in the login keychain (Sparkle's `generate_keys`). Sparkle refuses
+	  any update whose signature doesn't verify against it, so an attacker who
+	  takes over the appcast host still can't ship code — which matters, because
+	  this app installs a privileged helper. If the private key is ever lost,
+	  existing users cannot be updated; back it up with `generate_keys -x`.
+	-->
+	<key>SUFeedURL</key>
+	<string>https://saif-09.github.io/insomniac/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>4zfQv8InWst/zjsl4qZqYIzoaX+52iHiuZmB2ca4N/g=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+</dict>
+</plist>

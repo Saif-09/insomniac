@@ -1,13 +1,25 @@
 #!/usr/bin/env bash
 #
-# package.sh — build a Release insomniac.app and wrap it in a drag-to-install DMG.
+# package.sh — build, sign, notarize and package the direct-download Insomniac.
 #
-# Free Apple ID (now):   produces an un-notarized DMG. It works, but recipients
-#                        must right-click → Open the first time (Gatekeeper warns).
-# Paid program (later):  if a "Developer ID Application" cert is in your keychain
-#                        AND you export NOTARY_PROFILE=<your notarytool profile>,
-#                        it re-signs with Developer ID, notarizes, and staples —
-#                        a clean double-clickable download. See PUBLISHING.md.
+# Produces build/insomniac.dmg: a Developer-ID-signed, hardened-runtime,
+# notarized, stapled disk image, plus the Sparkle appcast entry that tells
+# existing users the new version exists.
+#
+# Why archive/exportArchive rather than `codesign --force` over the built app:
+# the bundle now contains a privileged helper AND Sparkle.framework, and Sparkle
+# nests an XPC service that carries its own entitlements. Re-signing that from
+# the outside strips them (`--force` without `--entitlements` drops what was
+# there) and produces an app that passes `codesign --verify` but fails to
+# update. Letting Xcode export the archive signs every nested component
+# inside-out with the right identity and the right entitlements.
+#
+# Usage:
+#   ./Scripts/package.sh                    # build + sign + notarize + DMG
+#   SKIP_NOTARIZE=1 ./Scripts/package.sh    # skip the notary round-trip
+#
+# Notarization credentials come from a notarytool keychain profile; set
+# NOTARY_PROFILE to override the default name. See PUBLISHING.md.
 #
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -18,26 +30,61 @@ BUILD_DIR="$PWD/build"
 APP_NAME="insomniac.app"
 VOL="insomniac"
 DMG="$BUILD_DIR/insomniac.dmg"
-NOTARY_PROFILE="${NOTARY_PROFILE:-}"
+ARCHIVE="$BUILD_DIR/insomniac.xcarchive"
+EXPORT_DIR="$BUILD_DIR/export"
+NOTARY_PROFILE="${NOTARY_PROFILE:-insomniac-notary}"
+SKIP_NOTARIZE="${SKIP_NOTARIZE:-}"
+TEAM_ID="DTQF9KJP6S"
 
 rm -rf "$BUILD_DIR"; mkdir -p "$BUILD_DIR"
 
-echo "▶ Building ${CONFIG}…"
+# --- Archive ----------------------------------------------------------------
+echo "▶ Archiving ${CONFIG}…"
 xcodebuild -project insomniac.xcodeproj -scheme "$SCHEME" -configuration "$CONFIG" \
-  -derivedDataPath "$BUILD_DIR/dd" -destination 'generic/platform=macOS' build >/dev/null
-APP="$BUILD_DIR/dd/Build/Products/$CONFIG/$APP_NAME"
-[ -d "$APP" ] || { echo "✗ build produced no app"; exit 1; }
+  -destination 'generic/platform=macOS' -archivePath "$ARCHIVE" \
+  archive >/dev/null
 
-# --- Optional: switch to Developer ID signing (paid program only) ------------
-DEVID="$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | awk '{print $2}' || true)"
-if [ -n "$DEVID" ]; then
-  echo "▶ Re-signing with Developer ID ($DEVID), inside-out…"
-  codesign --force --options runtime --timestamp --sign "$DEVID" \
-    "$APP/Contents/MacOS/dev.saif.insomniac.helper"
-  codesign --force --options runtime --timestamp --sign "$DEVID" "$APP"
-  codesign --verify --deep --strict --verbose=1 "$APP"
+# --- Export with Developer ID ------------------------------------------------
+cat > "$BUILD_DIR/ExportOptions.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>developer-id</string>
+	<key>teamID</key>
+	<string>${TEAM_ID}</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+</dict>
+</plist>
+PLIST
+
+echo "▶ Exporting with Developer ID…"
+xcodebuild -exportArchive -archivePath "$ARCHIVE" \
+  -exportOptionsPlist "$BUILD_DIR/ExportOptions.plist" \
+  -exportPath "$EXPORT_DIR" >/dev/null
+
+APP="$EXPORT_DIR/$APP_NAME"
+[ -d "$APP" ] || { echo "✗ export produced no app"; exit 1; }
+
+echo "▶ Verifying signature…"
+codesign --verify --deep --strict --verbose=1 "$APP"
+codesign -dv --verbose=2 "$APP" 2>&1 | grep -E "Authority=Developer ID|Runtime" || {
+  echo "✗ not signed with Developer ID + hardened runtime"; exit 1; }
+
+# --- Notarize the app before packaging --------------------------------------
+# Notarizing the app itself (not just the DMG) means the ticket is stapled into
+# the bundle, so it stays valid however the user ends up copying it out.
+if [ -z "$SKIP_NOTARIZE" ]; then
+  echo "▶ Notarizing the app (profile: $NOTARY_PROFILE)…"
+  ZIP="$BUILD_DIR/insomniac-notarize.zip"
+  ditto -c -k --keepParent "$APP" "$ZIP"
+  xcrun notarytool submit "$ZIP" --keychain-profile "$NOTARY_PROFILE" --wait
+  xcrun stapler staple "$APP"
+  rm -f "$ZIP"
 else
-  echo "⚠ No 'Developer ID Application' certificate — DMG will be un-notarized."
+  echo "⚠ SKIP_NOTARIZE set — the app is signed but not notarized."
 fi
 
 # --- Stage (ditto preserves the signature; cp -R would not) ------------------
@@ -47,16 +94,6 @@ ln -s /Applications "$STAGE/Applications"
 
 echo "▶ Rendering install-window background…"
 swift "$PWD/Scripts/make_dmg_background.swift" "$STAGE/.background/bg.png" >/dev/null
-
-# A copyable command file, so users can grab the command from the DMG itself
-# (the website also has a Copy button).
-cat > "$STAGE/Copy command.txt" <<'TXT'
-Copy the line below and paste and run in terminal 👇
-
-xattr -dr com.apple.quarantine /Applications/insomniac.app
-
-then open app
-TXT
 
 # --- Build a read-write DMG, lay out the install window, then compress -------
 echo "▶ Building styled DMG…"
@@ -79,9 +116,8 @@ tell application "Finder"
     set icon size of vo to 100
     set text size of vo to 12
     set background picture of vo to file ".background:bg.png"
-    set position of item "$APP_NAME" of container window to {175, 155}
-    set position of item "Applications" of container window to {415, 155}
-    set position of item "Copy command.txt" of container window to {600, 155}
+    set position of item "$APP_NAME" of container window to {245, 155}
+    set position of item "Applications" of container window to {455, 155}
     update without registering applications
     delay 1
     close
@@ -93,16 +129,18 @@ hdiutil detach "/Volumes/$VOL" >/dev/null 2>&1 || hdiutil detach "/Volumes/$VOL"
 hdiutil convert "$RW" -format UDZO -imagekey zlib-level=9 -ov -o "$DMG" >/dev/null
 rm -f "$RW"
 
-# --- Optional: notarize + staple (needs DevID + NOTARY_PROFILE) --------------
-if [ -n "$DEVID" ] && [ -n "$NOTARY_PROFILE" ]; then
-  echo "▶ Notarizing (profile: $NOTARY_PROFILE)…"
+# --- Sign + notarize the DMG itself -----------------------------------------
+if [ -z "$SKIP_NOTARIZE" ]; then
+  DEVID="$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | awk '{print $2}')"
+  echo "▶ Signing and notarizing the DMG…"
+  codesign --force --sign "$DEVID" --timestamp "$DMG"
   xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
   xcrun stapler staple "$DMG"
-  xcrun stapler validate "$DMG" && echo "✓ Notarized + stapled."
-else
-  echo "⚠ Skipped notarization."
-  echo "  Recipients must right-click → Open the app the first time (Gatekeeper)."
-  echo "  See PUBLISHING.md to enable notarization."
+  xcrun stapler validate "$DMG"
+  echo "✓ Notarized + stapled."
+  spctl -a -t open --context context:primary-signature -v "$DMG" || true
 fi
 
 echo "✓ Done → $DMG"
+echo
+echo "Next: ./Scripts/update_appcast.sh  (signs the DMG for Sparkle and updates docs/appcast.xml)"

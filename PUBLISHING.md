@@ -58,10 +58,16 @@ Stored once in the keychain as the `insomniac-notary` profile:
 
 ```bash
 xcrun notarytool store-credentials insomniac-notary \
-  --key ~/.appstoreconnect/private_keys/AuthKey_C6U4RB9DZ6.p8 \
-  --key-id C6U4RB9DZ6 \
-  --issuer <issuer-uuid>
+  --key ~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8 \
+  --key-id "$ASC_KEY_ID" \
+  --issuer "$ASC_ISSUER_ID"
 ```
+
+`ASC_KEY_ID` / `ASC_ISSUER_ID` come from App Store Connect → Users and Access →
+Integrations → Keys (the issuer UUID sits above the key table). They're kept out
+of this repo because it's public — neither is a secret on its own, but together
+with a leaked `.p8` they're everything an attacker needs. Put them in your shell
+profile; `Scripts/appstore.sh` reads them from the environment.
 
 Confirm it works with `xcrun notarytool history --keychain-profile insomniac-notary`.
 

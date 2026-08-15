@@ -36,10 +36,21 @@ OUT="$PWD/build/appstore"
 ARCHIVE="$OUT/Insomniac.xcarchive"
 PKG="$OUT/export/Insomniac.pkg"
 TEAM_ID="DTQF9KJP6S"
-KEY_ID="C6U4RB9DZ6"
-ISSUER_ID="cfd8675a-4971-490c-b275-56b6a3fb1ea6"
+# Deliberately not hardcoded: this repo is public, and while the key ID and
+# issuer ID aren't secrets on their own, they're two thirds of what an attacker
+# needs if the .p8 ever leaks. Keep them in your shell profile:
+#   export ASC_KEY_ID=…  ASC_ISSUER_ID=…
+# The matching AuthKey_$ASC_KEY_ID.p8 must be in ~/.appstoreconnect/private_keys.
+KEY_ID="${ASC_KEY_ID:-}"
+ISSUER_ID="${ASC_ISSUER_ID:-}"
 UPLOAD=1
 [ "${1:-}" = "--no-upload" ] && UPLOAD=0
+
+if [ -z "$KEY_ID" ] || [ -z "$ISSUER_ID" ]; then
+  echo "✗ Set ASC_KEY_ID and ASC_ISSUER_ID first (App Store Connect →"
+  echo "  Users and Access → Integrations → Keys; the issuer UUID is above the table)."
+  exit 1
+fi
 
 rm -rf "$OUT"; mkdir -p "$OUT"
 

@@ -1,22 +1,26 @@
 # insomniac
 
-Keep your Mac awake with the **lid closed** — safely. A menu-bar utility that
-prevents clamshell sleep (no external display required) and actively advises how
-long that's safe based on the machine's live thermal state, auto-stopping before
-things get too hot.
+Keep your Mac awake — safely. A menu-bar utility that blocks idle sleep for a
+duration you choose, and actively advises how long that's safe based on the
+machine's live thermal state, auto-stopping before things get too hot.
 
 ### [**Download &amp; install → saif-09.github.io/insomniac**](https://saif-09.github.io/insomniac/)
 
-The landing page has the download and a one-minute setup guide. Direct link to
-the latest build:
+Signed with a Developer ID certificate and notarized by Apple — drag it to
+Applications and open it. Direct link to the latest build:
 [**insomniac.dmg**](https://github.com/Saif-09/insomniac/releases/latest/download/insomniac.dmg)
-(unsigned test build — see the setup steps on the page).
 
-> macOS clamshell sleep is **not** prevented by `caffeinate` or IOKit power
-> assertions unless you have an external display, power, and keyboard attached.
-> insomniac uses `pmset -a disablesleep 1`, which works with nothing attached —
-> and pairs it with a thermal safety layer because a closed lid restricts
-> airflow.
+> **On the lid, honestly.** Earlier versions of this README claimed insomniac
+> prevented clamshell sleep with nothing attached. That is not true on Apple
+> Silicon: since macOS Ventura the lid sensor forces sleep on close, and
+> *nothing* in software overrides it — not `pmset disablesleep`, not
+> `caffeinate`, not an IOKit assertion. The only way a Mac stays running with
+> the lid shut is clamshell mode: an external display, on power.
+>
+> What insomniac actually delivers is rock-solid **lid-open** keep-awake, plus
+> the option to turn the screen off when you close the lid. The app says so in
+> its own UI rather than promising something the hardware won't do. On Intel
+> Macs, `disablesleep` does still hold through a lid close.
 
 ---
 
@@ -38,8 +42,10 @@ All four PRD milestones are implemented:
 3. **"Indefinite":** not offered — the longest auto-off is a hard **8-hour cap**.
 4. **Temperature in UI:** risk level + advisory text only, no degree readout
    (honest given Apple Silicon has no supported CPU-temp API).
-5. **Distribution:** Developer-ID-signed, notarized direct download (the core
-   feature is sandbox-incompatible, so this is not a Mac App Store build).
+5. **Distribution:** both. A Developer-ID-signed, notarized direct download
+   with the privileged helper, and a sandboxed Mac App Store build that drops
+   `pmset`/the helper and keeps-awake with an IOKit assertion alone. See
+   [PUBLISHING.md](PUBLISHING.md).
 
 ---
 
@@ -205,21 +211,28 @@ sudo sfltool dumpbtm | grep -i insomniac           # lists a record once registe
 
 ---
 
-## Distribution (Developer ID + notarization)
+## Distribution
+
+Two builds from one source tree. `APP_STORE` is defined only for the App Store
+target; everything the sandbox forbids sits behind `#if !APP_STORE`.
 
 ```bash
-# Archive
-xcodebuild -project insomniac.xcodeproj -scheme insomniac \
-  -configuration Release archive -archivePath build/insomniac.xcarchive
-
-# Export Developer-ID-signed app (needs an ExportOptions.plist with
-# method = developer-id), then notarize + staple:
-xcrun notarytool submit insomniac.zip --keychain-profile "AC_NOTARY" --wait
-xcrun stapler staple insomniac.app
+./Scripts/package.sh          # direct download: Developer ID → notarize → staple → DMG
+./Scripts/update_appcast.sh   # sign the DMG for Sparkle, write docs/appcast.xml
+./Scripts/appstore.sh         # Mac App Store: sandboxed .pkg → validate → upload
 ```
 
-Hardened Runtime is enabled on both targets (required for notarization). The
-embedded helper is re-signed on copy (`CodeSignOnCopy`).
+| | Direct download | Mac App Store |
+|---|---|---|
+| Target / bundle ID | `insomniac` · `dev.saif.insomniac` | `insomniac-mas` · `dev.saif.insomniac.mas` |
+| Sandbox | No | Yes |
+| Keep-awake | IOKit assertion **+** `pmset disablesleep` via the helper | IOKit assertion only |
+| Updates | Sparkle | The App Store |
+
+Hardened Runtime is on for every target. Packaging goes through
+`archive`/`exportArchive` rather than `codesign --force`, because force-resigning
+strips the entitlements from Sparkle's nested XPC services — see PUBLISHING.md
+for that and the two App Store steps Apple's API refuses to automate.
 
 ---
 

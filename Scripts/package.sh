@@ -141,6 +141,21 @@ if [ -z "$SKIP_NOTARIZE" ]; then
   spctl -a -t open --context context:primary-signature -v "$DMG" || true
 fi
 
+# --- Also emit a version-stamped copy ----------------------------------------
+# The GitHub release needs BOTH names attached:
+#   insomniac.dmg           — what the landing page's releases/latest/download
+#                             link points at, and must keep pointing at
+#   insomniac-<version>.dmg — what the appcast enclosure references, because an
+#                             appcast holds several versions at once and each
+#                             entry has to resolve to its own build
+# They are byte-identical copies; attach both to the release.
+VERSION="$(defaults read "$APP/Contents/Info" CFBundleShortVersionString)"
+cp "$DMG" "$BUILD_DIR/insomniac-${VERSION}.dmg"
+
 echo "✓ Done → $DMG"
+echo "        → $BUILD_DIR/insomniac-${VERSION}.dmg  (same file, for the appcast enclosure)"
 echo
-echo "Next: ./Scripts/update_appcast.sh  (signs the DMG for Sparkle and updates docs/appcast.xml)"
+echo "Next:"
+echo "  1. Create the GitHub release, tag v${VERSION}, attach BOTH .dmg files above"
+echo "  2. ./Scripts/update_appcast.sh   (signs the DMG for Sparkle, writes docs/appcast.xml)"
+echo "  3. Commit and push docs/"

@@ -1,0 +1,69 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>insomniac</title>
+        <item>
+            <title>1.0.4</title>
+            <pubDate>Sun, 16 Aug 2026 01:09:26 +0530</pubDate>
+            <link>https://saif-09.github.io/insomniac/</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<!-- Release notes for 1.0.4, shown inside Sparkle's update sheet.
+     Keep it plain: Sparkle renders this in a small WebView with no stylesheet. -->
+<h2>Insomniac 1.0.4</h2>
+
+<h3>Notarized — no more Terminal step</h3>
+<p>
+  Insomniac is now signed with a Developer ID certificate and notarized by
+  Apple. New installs just open: no “can’t be verified” warning, and no
+  <code>xattr</code> command to paste into Terminal. If you ran that command for
+  an earlier version, you never need to again.
+</p>
+
+<h3>Automatic updates</h3>
+<p>
+  Insomniac can now check for updates on its own and install them for you —
+  this update is the last one you’ll have to fetch by hand. Every update is
+  cryptographically signed and refused if the signature doesn’t match. You can
+  turn automatic checks off in <strong>Settings → General</strong>.
+</p>
+
+<h3>Open at login</h3>
+<p>
+  A new <strong>Settings → General → Open at login</strong> switch starts
+  Insomniac with your Mac.
+</p>
+
+<h3>Fixes</h3>
+<ul>
+  <li>
+    The welcome window no longer reappears on every launch — it’s first-run
+    only now, with a <strong>Show</strong> button in Settings if you want it
+    back.
+  </li>
+  <li>
+    Installing the privileged helper for silent toggling now takes effect
+    immediately. Previously it kept asking for your password until you quit and
+    reopened the app, which made the feature look broken.
+  </li>
+  <li>
+    Closing the lid while the menu was open could be missed entirely, leaving
+    the screen on. Power-source changes had the same problem, so a low-battery
+    auto-stop could be delayed.
+  </li>
+  <li>
+    Launch is quicker: the startup check for a leftover keep-awake no longer
+    blocks the app while it runs.
+  </li>
+  <li>
+    The “what’s keeping your Mac awake” list is read straight from the system
+    now instead of being scraped out of command output — it’s more accurate and
+    costs far less battery while the System tab is open.
+  </li>
+</ul>
+]]></description>
+            <enclosure url="https://github.com/Saif-09/insomniac/releases/download/v1.0.4/insomniac-1.0.4.dmg" length="2083163" type="application/octet-stream" sparkle:edSignature="62vLdBmZqFtpv5q2dYSa1WdITkBIjsXMDQ0/lbvoA2VfihJpSNZyijNCp0rsSsDq9LkA16XFGOM4YAxPLnWiDg=="/>
+        </item>
+    </channel>
+</rss>

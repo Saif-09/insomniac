@@ -15,10 +15,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         QuarantineCleaner.selfHeal()
 
         MainActor.assumeIsolated {
-            // Show the walkthrough on every launch (quit → reopen shows it
-            // again), introducing the app and pointing users to the menu-bar
-            // icon with the "I live up here" arrow.
-            OnboardingController.shared.presentWelcome()
+            // First launch only. Re-showing the welcome window on every launch
+            // is wrong for a menu-bar utility — and actively hostile now that
+            // Insomniac can open at login, where it would greet you with a
+            // window at every boot. `presentIfNeeded` respects the saved flag;
+            // "Show welcome again" in the menu re-opens it on demand.
+            OnboardingController.shared.presentIfNeeded(prefs: AppController.shared.prefs)
         }
     }
 

@@ -48,7 +48,7 @@ final class LidMonitor {
             CFRunLoopRemoveSource(
                 CFRunLoopGetMain(),
                 IONotificationPortGetRunLoopSource(notifyPort).takeUnretainedValue(),
-                .defaultMode
+                .commonModes   // must match the mode `install()` added it to
             )
             IONotificationPortDestroy(notifyPort)
         }
@@ -87,7 +87,11 @@ final class LidMonitor {
         CFRunLoopAddSource(
             CFRunLoopGetMain(),
             IONotificationPortGetRunLoopSource(port).takeUnretainedValue(),
-            .defaultMode
+            // Common modes, not just default: while a menu or a control is
+            // tracking, the run loop leaves the default mode, and a lid close
+            // in that window would otherwise be missed entirely (no
+            // display-off, and a stale `isLidClosed`).
+            .commonModes
         )
     }
 

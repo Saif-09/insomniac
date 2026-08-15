@@ -27,9 +27,17 @@ final class AppController {
     let display = DisplayMonitor()
     let weather = WeatherService()
     let helperInstaller = HelperInstaller()
+    let loginItem = LoginItem()
     private let geo = IPGeolocationService()
     private let notifier = NotificationManager()
-    private let power: PowerControlling
+
+    /// Resolved fresh on every use, never cached. The user can install the
+    /// privileged helper from Settings *while the app is running* — caching the
+    /// controller at init meant they kept getting the AppleScript password
+    /// prompt until the next relaunch, which reads as "silent toggling doesn't
+    /// work". Resolving per call is cheap (an `SMAppService.status` read) and
+    /// makes the install take effect immediately.
+    private var power: PowerControlling { PowerControl.makeController() }
 
     /// In-process power assertion held for the duration of a session. It blocks
     /// idle *system* sleep (the lid-open case) reliably and with no privileges —
@@ -65,8 +73,6 @@ final class AppController {
     private var countdownTimer: Timer?
 
     init() {
-        self.power = PowerControl.makeController()
-
         // Drive the live thermal safety cutoff (FR-13).
         thermal.onChange = { [weak self] state in
             self?.handleThermalChange(state)
@@ -379,8 +385,14 @@ final class AppController {
     private func checkForCrashRecovery() {
         // Only meaningful when we have no active session of our own.
         guard !isActive else { return }
-        if SystemSleepState.isSleepDisabled() == true {
-            needsCrashRecovery = true
+        // `isSleepDisabled()` spawns `pmset -g` and waits for it. Doing that
+        // inline in `init` blocked the main thread on every launch (a visible
+        // hitch before the menu-bar icon appears), so probe off-actor and hop
+        // back with the answer.
+        Task {
+            let disabled = await Task.detached { SystemSleepState.isSleepDisabled() }.value
+            guard !self.isActive, disabled == true else { return }
+            self.needsCrashRecovery = true
         }
     }
 

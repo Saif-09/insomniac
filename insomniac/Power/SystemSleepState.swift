@@ -14,7 +14,10 @@ enum SystemSleepState {
     ///
     /// When `pmset -a disablesleep 1` is in effect, `pmset -g` reports a
     /// `SleepDisabled 1` line. Absence of the line means it is off.
-    static func isSleepDisabled() -> Bool? {
+    /// `nonisolated` on purpose: this module is main-actor-by-default, but the
+    /// probe blocks on a subprocess and must be callable from a background
+    /// task. It touches no shared state.
+    nonisolated static func isSleepDisabled() -> Bool? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
         process.arguments = ["-g"]

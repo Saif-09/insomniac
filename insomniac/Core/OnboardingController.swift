@@ -201,8 +201,12 @@ final class OnboardingController: NSObject, NSWindowDelegate {
             ctx.duration = 0.4
             panel.animator().alphaValue = 0
         }, completionHandler: { [weak self] in
-            self?.pointerPanel?.orderOut(nil)
-            self?.pointerPanel = nil
+            // The completion handler is a plain (non-isolated) closure, so hop
+            // back onto the main actor explicitly before touching state.
+            MainActor.assumeIsolated {
+                self?.pointerPanel?.orderOut(nil)
+                self?.pointerPanel = nil
+            }
         })
     }
 

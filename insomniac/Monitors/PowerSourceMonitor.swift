@@ -30,7 +30,7 @@ final class PowerSourceMonitor {
 
     deinit {
         if let runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .defaultMode)
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
         }
     }
 
@@ -48,7 +48,9 @@ final class PowerSourceMonitor {
             return
         }
         runLoopSource = source
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
+        // Common modes: the menu is a tracking run-loop mode, and the battery
+        // chip / low-battery cutoff must keep updating while it's open.
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
     }
 
     private func refresh() {

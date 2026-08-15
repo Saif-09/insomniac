@@ -56,6 +56,9 @@ struct SettingsSection: View {
         // safety cutoffs first, the optional smart suggestions next, and the
         // one-time privileged-helper setup last.
         VStack(alignment: .leading, spacing: 14) {
+            group("General") {
+                loginItemRows.rowPadding()
+            }
             group("While awake") {
                 lidRow
                 separator
@@ -70,6 +73,8 @@ struct SettingsSection: View {
             }
             group("Setup") {
                 helperRow.rowPadding()
+                separator
+                welcomeRow.rowPadding()
             }
         }
     }
@@ -107,6 +112,42 @@ struct SettingsSection: View {
     }
 
     // MARK: - Individual rows
+
+    /// "Open at login" plus whatever the system has to say about it. Backed by
+    /// `SMAppService.mainApp` rather than a saved bool, so the switch always
+    /// reflects the real Login Items state (see LoginItem).
+    private var loginItemRows: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SettingToggleRow(
+                icon: "power",
+                title: "Open at login",
+                subtitle: "start Insomniac with your Mac",
+                isOn: Binding(
+                    get: { app.loginItem.isEnabled },
+                    set: { app.loginItem.setEnabled($0) }
+                )
+            )
+            switch app.loginItem.state {
+            case .requiresApproval:
+                HStack(spacing: 8) {
+                    Text("Turned off in System Settings.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    Button("Open Login Items") { app.loginItem.openLoginItemsSettings() }
+                        .controlSize(.small)
+                }
+                .padding(.leading, 30)
+            case .failed(let message):
+                Text(message)
+                    .font(.caption).foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 30)
+            case .enabled, .disabled:
+                EmptyView()
+            }
+        }
+        .onAppear { app.loginItem.refresh() }
+    }
 
     private var lidRow: some View {
         @Bindable var prefs = app.prefs
@@ -235,6 +276,15 @@ struct SettingsSection: View {
         case .notRegistered:
             Text("Uses a password prompt each time.")
                 .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    /// The walkthrough no longer opens on every launch (it's first-run only), so
+    /// this is how you get it back.
+    private var welcomeRow: some View {
+        SettingRow(icon: "sparkles", title: "Welcome walkthrough") {
+            Button("Show") { OnboardingController.shared.presentWelcome() }
+                .controlSize(.small)
         }
     }
 

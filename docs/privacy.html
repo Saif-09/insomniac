@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — Insomniac</title>
+<meta name="description" content="Insomniac's privacy policy. No accounts, no analytics, no tracking; the only network request is the optional weather advisory." />
+<style>
+  :root {
+    --bg: #07080b;
+    --surface: rgba(255,255,255,0.04);
+    --stroke: rgba(255,255,255,0.09);
+    --text: #f4f6fb;
+    --muted: #8b93a7;
+    --faint: #5b6273;
+    --accent: #6ea0ff;
+    --green: #34c759;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 72px 24px 96px; }
+  a { color: var(--accent); }
+  .back { font-size: 14px; color: var(--muted); text-decoration: none; display: inline-block; margin-bottom: 36px; }
+  .back:hover { color: var(--text); }
+  h1 { font-size: clamp(30px, 5vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; }
+  .updated { color: var(--faint); font-size: 13.5px; margin-top: 10px; }
+  .lede {
+    margin-top: 26px; padding: 20px 22px; border-radius: 16px;
+    background: rgba(52,199,89,0.08); border: 1px solid rgba(52,199,89,0.22);
+    font-size: 16.5px;
+  }
+  .lede strong { color: var(--green); }
+  h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin: 40px 0 12px; }
+  p { color: var(--muted); font-size: 15.5px; }
+  p + p { margin-top: 12px; }
+  ul { margin: 12px 0 0 20px; color: var(--muted); font-size: 15.5px; }
+  li + li { margin-top: 8px; }
+  strong { color: var(--text); font-weight: 600; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 13.5px;
+    background: rgba(255,255,255,0.07); padding: 1px 6px; border-radius: 5px;
+  }
+  footer {
+    margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--stroke);
+    color: var(--faint); font-size: 13.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./">← Insomniac</a>
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated 16 August 2026 · applies to Insomniac for macOS, both the direct download and the Mac App Store version.</p>
+
+  <div class="lede">
+    <strong>Insomniac collects nothing about you.</strong> There is no account, no
+    sign-in, no analytics, and no tracking of any kind. Nothing you do in the app
+    is recorded or transmitted anywhere.
+  </div>
+
+  <h2>What stays on your Mac</h2>
+  <p>
+    Your settings — auto-off length, thermal and battery cutoff levels, and the
+    other preferences — are stored locally on your Mac using the standard macOS
+    preferences system. They never leave the device, and they are removed when you
+    delete the app.
+  </p>
+
+  <h2>The one network request</h2>
+  <p>
+    Insomniac makes network requests only when you turn on the optional
+    <strong>Use local weather</strong> setting, which folds the outdoor
+    temperature into its advice about how long a session is safe. With that
+    setting on:
+  </p>
+  <ul>
+    <li>
+      Your device's public IP address is sent to an IP-geolocation service
+      (<a href="https://www.geojs.io/" rel="noopener">GeoJS</a>, falling back to
+      <a href="https://freeipapi.com/" rel="noopener">freeipapi.com</a>) to
+      estimate roughly which city you are in. This is not GPS, it asks for no
+      Location Services permission, and it is accurate only to city level.
+    </li>
+    <li>
+      Those approximate coordinates are sent to
+      <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> to fetch the
+      current temperature.
+    </li>
+  </ul>
+  <p>
+    Nothing else is sent, nothing is attached to an identity, and no result is
+    stored. Turn <strong>Use local weather</strong> off and Insomniac makes no
+    network requests at all — the safety advisory still works, using your Mac's
+    thermal state, power source, and system load.
+  </p>
+  <p>
+    Those three services are independent of Insomniac and have their own privacy
+    practices, linked above.
+  </p>
+
+  <h2>Updates (direct download only)</h2>
+  <p>
+    The version downloaded from this site checks for new releases using
+    <a href="https://sparkle-project.org/" rel="noopener">Sparkle</a>. That check
+    is a request for an update file hosted on GitHub; it sends no information
+    about you or your Mac beyond what any ordinary web request necessarily
+    reveals, and it does not identify you. You can turn it off in
+    <strong>Settings → General → Automatic updates</strong>. The Mac App Store
+    version does not include this — the App Store handles its updates.
+  </p>
+
+  <h2>What Insomniac reads on your Mac</h2>
+  <p>
+    To do its job the app reads system state: thermal level, power source and
+    battery percentage, whether the lid is closed, whether an external display is
+    attached, and which apps are currently holding your Mac awake. All of this is
+    read through Apple's standard APIs, used only to show you what's happening and
+    to run the safety cutoffs, and none of it is transmitted or stored.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    Insomniac is a utility with no user-generated content, no messaging, and no
+    data collection, so there is nothing to collect from anyone of any age.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If this policy ever changes, the revised version will be posted on this page
+    with a new date. Given the app collects nothing, any change is likely to be a
+    clarification rather than a new practice.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about this policy or the app: open an issue at
+    <a href="https://github.com/Saif-09/insomniac" rel="noopener">github.com/Saif-09/insomniac</a>.
+  </p>
+
+  <footer>
+    Insomniac is open source. If you would rather verify than trust, the code is
+    all there — the weather requests are in <code>Weather/</code>, and there is no
+    analytics SDK anywhere in the project.
+  </footer>
+</div>
+</body>
+</html>

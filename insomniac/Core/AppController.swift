@@ -508,3 +508,34 @@ final class AppController {
         }
     }
 }
+
+// MARK: - Screenshot posing (DEBUG only)
+
+#if DEBUG
+extension AppController {
+    /// Put the controller into a fixed, fake state so the App Store screenshots
+    /// can show a running session without actually touching system sleep.
+    ///
+    /// This is an extension in the same file on purpose: `isActive` and `session`
+    /// are `private(set)`, and same-file extensions are the only thing outside
+    /// the type body allowed to write them — which keeps the setters closed to
+    /// the rest of the app while still making the state poseable.
+    ///
+    /// Wrapped in `#if DEBUG` so it cannot exist in a shipping build. Screenshots
+    /// are generated from a Debug build; Release never compiles this.
+    func poseForScreenshot(active: Bool, duration: AutoOffDuration, elapsed: TimeInterval) {
+        if active {
+            let started = Date().addingTimeInterval(-elapsed)
+            session = Session(startedAt: started, duration: duration)
+            isActive = true
+            now = started.addingTimeInterval(elapsed)
+        } else {
+            session = nil
+            isActive = false
+            chosenDuration = duration
+        }
+        needsCrashRecovery = false
+        lastErrorMessage = nil
+    }
+}
+#endif

@@ -10,6 +10,23 @@ import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
+        // App Store screenshot generation. Deferred to the next run-loop turn on
+        // purpose: blocking inside applicationDidFinishLaunching stops the app
+        // ever becoming *active*, and AppKit then draws every control in its
+        // inactive appearance — the accent-coloured "on" switch renders as a
+        // grey pill. Letting launch complete first fixes that.
+        if ProcessInfo.processInfo.environment["INSOMNIAC_SCREENSHOTS"] != nil {
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    _ = ScreenshotGenerator.runIfRequested()
+                    NSApplication.shared.terminate(nil)
+                }
+            }
+            return
+        }
+        #endif
+
         #if !APP_STORE
         // Strip our own Gatekeeper quarantine so the "Not Opened" warning never
         // recurs for this build (best-effort, off the main thread). App Store

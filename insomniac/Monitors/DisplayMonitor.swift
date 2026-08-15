@@ -24,6 +24,13 @@ final class DisplayMonitor {
     /// `true` when at least one online display is *not* the built-in panel.
     private(set) var hasExternalDisplay: Bool = DisplayMonitor.detectExternalDisplay()
 
+    #if DEBUG
+    /// When posed for screenshots, ignore live screen-parameter changes.
+    /// Activating the app fires `didChangeScreenParameters`, which re-detected
+    /// the real external display and silently undid the pose.
+    fileprivate var isFrozenForScreenshot = false
+    #endif
+
     @ObservationIgnored nonisolated(unsafe) private var observer: NSObjectProtocol?
 
     init() {
@@ -34,6 +41,9 @@ final class DisplayMonitor {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
+                #if DEBUG
+                if self?.isFrozenForScreenshot == true { return }
+                #endif
                 self?.hasExternalDisplay = DisplayMonitor.detectExternalDisplay()
             }
         }
@@ -54,3 +64,21 @@ final class DisplayMonitor {
         return displays.prefix(Int(count)).contains { CGDisplayIsBuiltin($0) == 0 }
     }
 }
+
+// MARK: - Screenshot posing (DEBUG only)
+
+#if DEBUG
+extension DisplayMonitor {
+    /// Force the external-display answer for App Store screenshots.
+    ///
+    /// `canKeepAwakeWithLidClosed` depends on this, and the build machine
+    /// happens to have an external display on AC — which makes the app
+    /// truthfully say "Awake, even with the lid closed". True here, but not for
+    /// most users, so shipping that as a store screenshot would promise
+    /// clamshell-only behaviour to everyone. Pose the common case instead.
+    func poseForScreenshot(hasExternalDisplay value: Bool) {
+        hasExternalDisplay = value
+        isFrozenForScreenshot = true
+    }
+}
+#endif

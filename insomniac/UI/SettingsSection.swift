@@ -15,7 +15,14 @@ import SwiftUI
 
 struct SettingsSection: View {
     @Environment(AppController.self) private var app
-    @State private var expanded = false
+    @State private var expanded: Bool
+
+    /// Collapsed by default, as in the menu. The parameter exists so the App
+    /// Store screenshot generator can render the section open without having to
+    /// reach into private view state.
+    init(initiallyExpanded: Bool = false) {
+        _expanded = State(initialValue: initiallyExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {

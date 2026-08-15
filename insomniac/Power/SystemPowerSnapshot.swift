@@ -236,3 +236,17 @@ final class SystemPowerService {
 
     #endif
 }
+
+// MARK: - Screenshot posing (DEBUG only)
+
+#if DEBUG
+extension SystemPowerService {
+    /// Inject a fixed snapshot so the System tab renders a realistic
+    /// "keeping your Mac awake" list in screenshots. `snapshot` is
+    /// `private(set)`, so this same-file extension is what can write it.
+    func poseForScreenshot(_ posed: PowerSnapshot) {
+        snapshot = posed
+        isRefreshing = false
+    }
+}
+#endif

@@ -69,38 +69,47 @@ enum ScreenshotGenerator {
         // the caveat card) is what should appear in the store screenshots.
         app.display.poseForScreenshot(hasExternalDisplay: false)
 
+        // Order and wording both matter here: these are metadata, and App Review
+        // rejected the previous set under 4.3(a) as a duplicate of the many
+        // keep-awake apps already on the store. Leading with "one switch keeps
+        // it awake" is precisely what every one of those says. The differentiators
+        // — the safety cutoffs, the advisory, the assertion inspector — now come
+        // first, and the generic on/off switch comes last.
+        //
+        // "Mac" is gone from every headline as well: 5.2.5 flagged the subtitle
+        // for trademark use, and screenshot text is metadata under the same rule.
         let shots: [Shot] = [
             Shot(
-                file: "01-stay-awake",
-                headline: "One switch. Your Mac stays awake.",
-                subline: "Downloads, renders, builds — it keeps going, then puts everything back."
+                file: "01-safety",
+                headline: "It stops before things overheat.",
+                subline: "Thermal and low-battery cutoffs end the session on their own. Nothing to babysit."
+            ) { app in
+                app.poseForScreenshot(active: true, duration: .oneHour, elapsed: 12 * 60)
+                return AnyView(SettingsScreenshotWrapper().environment(app))
+            },
+            Shot(
+                file: "02-advisory",
+                headline: "It tells you how long is safe.",
+                subline: "A live read of heat, power source and load — with a session length to match."
             ) { app in
                 app.poseForScreenshot(active: true, duration: .twoHours, elapsed: 27 * 60 + 18)
                 return AnyView(MenuContent().environment(app))
             },
             Shot(
-                file: "02-auto-off",
-                headline: "It always turns itself off.",
-                subline: "Pick 15 minutes, 8 hours, or anything between. Normal sleep comes back on its own."
-            ) { app in
-                app.poseForScreenshot(active: false, duration: .custom(seconds: 95 * 60), elapsed: 0)
-                return AnyView(MenuContent().environment(app))
-            },
-            Shot(
                 file: "03-system",
-                headline: "See what's keeping your Mac awake.",
-                subline: "Every app holding your Mac up, read straight from macOS."
+                headline: "See exactly what's blocking sleep.",
+                subline: "Every process holding a power assertion right now, read straight from the system."
             ) { app in
                 app.poseForScreenshot(active: true, duration: .twoHours, elapsed: 27 * 60 + 18)
                 return AnyView(SystemTabScreenshotWrapper().environment(app))
             },
             Shot(
-                file: "04-safety",
-                headline: "Stops before your Mac gets hot.",
-                subline: "Thermal and low-battery cutoffs end the session for you. No babysitting."
+                file: "04-timer",
+                headline: "A timer that always ends it.",
+                subline: "Ten minutes to eight hours, or any length you pick. Normal sleep returns by itself."
             ) { app in
-                app.poseForScreenshot(active: true, duration: .oneHour, elapsed: 12 * 60)
-                return AnyView(SettingsScreenshotWrapper().environment(app))
+                app.poseForScreenshot(active: false, duration: .custom(seconds: 95 * 60), elapsed: 0)
+                return AnyView(MenuContent().environment(app))
             },
         ]
 

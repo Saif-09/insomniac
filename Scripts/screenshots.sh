@@ -37,7 +37,7 @@ echo "▶ Rendering…"
 open -n "$APP" --env "INSOMNIAC_SCREENSHOTS=$OUT"
 
 for _ in $(seq 1 40); do
-  [ -f "$OUT/04-safety.png" ] && break
+  [ -f "$OUT/04-timer.png" ] && break
   sleep 1
 done
 sleep 1
